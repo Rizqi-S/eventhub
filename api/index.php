@@ -2,43 +2,40 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// --- VERCEL SPECIFIC STORAGE CONFIGURATION ---
-$storagePath = '/tmp/storage';
-
-// Create necessary directories in /tmp
-$directories = [
-    "$storagePath/framework/views",
+// 1. Create the required storage structure in Vercel's /tmp directory
+$storagePath = '/tmp/storage';$directories = [
+    "$storagePath/app/public",
     "$storagePath/framework/cache/data",
     "$storagePath/framework/sessions",
+    "$storagePath/framework/testing",
+    "$storagePath/framework/views",
     "$storagePath/logs",
-    "$storagePath/bootstrap/cache",
 ];
 
-foreach ($directories as $dir) {
+foreach ($directories as$dir) {
     if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
+        mkdir($dir, 0755, true);
     }
 }
 
-// Tell Laravel to use this new path
+// 2. Set environment variables just in case
 putenv("APP_STORAGE=$storagePath");
-$_ENV['APP_STORAGE'] = $storagePath;
-$_SERVER['APP_STORAGE'] = $storagePath;
-// ----------------------------------------------
+$_ENV['APP_STORAGE'] =$storagePath;
+$_SERVER['APP_STORAGE'] =$storagePath;
 
+// 3. Boot the application
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-// Instruct the application to use the custom storage path
-if (env('APP_STORAGE')) {
-    $app->useStoragePath(env('APP_STORAGE'));
-}
+// 4. FORCE BIND the storage paths directly into the container
+$app->useStoragePath($storagePath);
 
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+// Explicitly bind the view.compiled path to avoid the specific view error
+$app['config']->set('view.compiled', "$storagePath/framework/views");
 
-$response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
+// 5. Handle the request
+$kernel =$app->make(Illuminate\Contracts\Http\Kernel::class);
+
+$response = $kernel->handle($request = Illuminate\Http\Request::capture()
 );
 
 $response->send();
-
-$kernel->terminate($request, $response);
