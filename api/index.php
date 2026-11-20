@@ -1,21 +1,44 @@
 <?php
 
-// 1. Tentukan path storage khusus untuk Vercel
-$storage = '/tmp';
+require __DIR__ . '/../vendor/autoload.php';
 
-// 2. Buat struktur folder yang dibutuhkan Laravel jika belum ada
+// --- VERCEL SPECIFIC STORAGE CONFIGURATION ---
+$storagePath = '/tmp/storage';
+
+// Create necessary directories in /tmp
 $directories = [
-    "$storage/framework/cache/data",
-    "$storage/framework/sessions",
-    "$storage/framework/views",
-    "$storage/logs",
+    "$storagePath/framework/views",
+    "$storagePath/framework/cache/data",
+    "$storagePath/framework/sessions",
+    "$storagePath/logs",
+    "$storagePath/bootstrap/cache",
 ];
 
-foreach ($directories as $directory) {
-    if (!is_dir($directory)) {
-        mkdir($directory, 0777, true);
+foreach ($directories as $dir) {
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
     }
 }
 
-// 3. Forward request ke public/index.php Laravel
-require __DIR__ . '/../public/index.php';
+// Tell Laravel to use this new path
+putenv("APP_STORAGE=$storagePath");
+$_ENV['APP_STORAGE'] = $storagePath;
+$_SERVER['APP_STORAGE'] = $storagePath;
+// ----------------------------------------------
+
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+// Instruct the application to use the custom storage path
+if (env('APP_STORAGE')) {
+    $app->useStoragePath(env('APP_STORAGE'));
+}
+
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
+
+$response->send();
+
+$kernel->terminate($request, $response);
