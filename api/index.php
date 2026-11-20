@@ -1,16 +1,19 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+use Illuminate\Http\Request;
 
-// 1. Create the required storage structure in Vercel's /tmp directory
-$storagePath = '/tmp/storage';
+define('LARAVEL_START', microtime(true));
+
+// 1. Siapkan direktori writable di /tmp Vercel
+$tmpPath = '/tmp';
 $directories = [
-    "$storagePath/app/public",
-    "$storagePath/framework/cache/data",
-    "$storagePath/framework/sessions",
-    "$storagePath/framework/testing",
-    "$storagePath/framework/views",
-    "$storagePath/logs",
+    "$tmpPath/storage/app/public",
+    "$tmpPath/storage/framework/cache/data",
+    "$tmpPath/storage/framework/sessions",
+    "$tmpPath/storage/framework/testing",
+    "$tmpPath/storage/framework/views",
+    "$tmpPath/storage/logs",
+    "$tmpPath/bootstrap/cache",
 ];
 
 foreach ($directories as $dir) {
@@ -19,30 +22,25 @@ foreach ($directories as $dir) {
     }
 }
 
-// 2. Set environment variables to route storage to /tmp
-putenv("APP_STORAGE=$storagePath");
-$_ENV['APP_STORAGE'] = $storagePath;
-$_SERVER['APP_STORAGE'] = $storagePath;
+// 2. Arahkan cache bootstrap & view ke /tmp sebelum aplikasi dimuat
+putenv("APP_SERVICES_CACHE=$tmpPath/bootstrap/cache/services.php");
+putenv("APP_PACKAGES_CACHE=$tmpPath/bootstrap/cache/packages.php");
+putenv("APP_CONFIG_CACHE=$tmpPath/bootstrap/cache/config.php");
+putenv("APP_ROUTES_CACHE=$tmpPath/bootstrap/cache/routes.php");
+putenv("VIEW_COMPILED_PATH=$tmpPath/storage/framework/views");
 
-// Safely route the compiled views path using env vars instead of the container
-$viewPath = "$storagePath/framework/views";
-putenv("VIEW_COMPILED_PATH=$viewPath");
-$_ENV['VIEW_COMPILED_PATH'] = $viewPath;
-$_SERVER['VIEW_COMPILED_PATH'] = $viewPath;
+$_ENV['APP_SERVICES_CACHE'] = "$tmpPath/bootstrap/cache/services.php";
+$_ENV['APP_PACKAGES_CACHE'] = "$tmpPath/bootstrap/cache/packages.php";
+$_ENV['APP_CONFIG_CACHE'] = "$tmpPath/bootstrap/cache/config.php";
+$_ENV['APP_ROUTES_CACHE'] = "$tmpPath/bootstrap/cache/routes.php";
+$_ENV['VIEW_COMPILED_PATH'] = "$tmpPath/storage/framework/views";
 
-// 3. Boot the application
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+// 3. Muat autoloader Composer
+require __DIR__.'/../vendor/autoload.php';
 
-// 4. Force bind the storage path
-$app->useStoragePath($storagePath);
+// 4. Boot aplikasi dan arahkan storage path
+$app = require_once __DIR__.'/../bootstrap/app.php';
+$app->useStoragePath("$tmpPath/storage");
 
-// 5. Handle the request
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-
-$response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
-);
-
-$response->send();
-
-$kernel->terminate($request, $response);
+// 5. Jalankan request menggunakan metode resmi Laravel 11
+$app->handleRequest(Request::capture());
