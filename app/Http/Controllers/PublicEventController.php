@@ -15,7 +15,7 @@ class PublicEventController extends Controller
     public function home()
     {
         $events = Event::query()
-            ->whereIn('status_event', ['aktif', 'berlangsung'])
+            ->whereIn('status_event', ['aktif', 'berlangsung', 'ongoing', 'akan_datang'])
             ->where('tanggal_mulai', '>=', now()->startOfDay())
             ->withCount('pendaftarans')
             ->orderBy('tanggal_mulai')
