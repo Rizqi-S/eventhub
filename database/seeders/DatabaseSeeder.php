@@ -11,10 +11,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SuperAdminSeeder::class,
             EventHubDummySeeder::class,
-            PesertaSeeder::class,
-            EventSeeder::class,
-            PendaftaranSeeder::class,
-            PresensiSeeder::class,
         ]);
     }
 }
