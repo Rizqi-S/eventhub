@@ -15,7 +15,7 @@ class PublicEventController extends Controller
     public function home()
     {
         $events = Event::query()
-            ->whereIn('status_event', ['ongoing', 'akan_datang', 'selesai'])
+            ->whereIn('status_event', ['ongoing', 'akan_datang'])
             ->where('tanggal_mulai', '>=', now()->startOfDay())
             ->withCount('pendaftarans')
             ->orderBy('tanggal_mulai')
@@ -28,7 +28,7 @@ class PublicEventController extends Controller
     public function index(Request $request)
     {
         $events = Event::query()
-            ->whereIn('status_event', ['aktif', 'berlangsung'])
+            ->whereIn('status_event', ['ongoing', 'akan_datang'])
             ->where('tanggal_mulai', '>=', now()->startOfDay())
             ->when($request->filled('q'), fn ($q) => $q->where(function ($sub) use ($request) {
                 $term = trim($request->string('q')->toString());
@@ -44,7 +44,7 @@ class PublicEventController extends Controller
 
     public function show(Event $event)
     {
-        abort_unless(in_array($event->status_event, ['aktif', 'berlangsung'], true), 404);
+        abort_unless(in_array($event->status_event, ['ongoing', 'akan_datang'], true), 404);
         abort_if($event->tanggal_mulai->lt(now()->startOfDay()), 404);
 
         $registered = $event->pendaftarans()
@@ -57,7 +57,7 @@ class PublicEventController extends Controller
 
     public function register(Event $event)
     {
-        abort_unless(in_array($event->status_event, ['aktif', 'berlangsung'], true), 404);
+        abort_unless(in_array($event->status_event, ['ongoing', 'akan_datang'], true), 404);
         abort_if($event->tanggal_mulai->lt(now()->startOfDay()), 404);
         $registered = $event->pendaftarans()->where('status_pendaftaran', '!=', 'ditolak')->count();
         abort_if($registered >= $event->kuota, 410, 'Kuota event sudah penuh.');
@@ -80,8 +80,8 @@ class PublicEventController extends Controller
         $pendaftaran = DB::transaction(function () use ($validated, $event) {
             $lockedEvent = Event::query()->lockForUpdate()->findOrFail($event->id);
 
-            if (! in_array($lockedEvent->status_event, ['aktif', 'berlangsung'], true)
-                || $lockedEvent->tanggal_mulai->lt(now()->startOfDay())) {
+            if (! in_array($lockedEvent->status_event, ['ongoing', 'akan_datang'], true)
+                or $lockedEvent->tanggal_mulai->lt(now()->startOfDay())) {
                 throw ValidationException::withMessages(['event' => 'Pendaftaran event ini sudah ditutup.']);
             }
 
@@ -118,7 +118,6 @@ class PublicEventController extends Controller
                 'peserta_id' => $peserta->id,
                 'event_id' => $lockedEvent->id,
                 'status_pendaftaran' => 'menunggu',
-                // Event gratis tidak memerlukan pembayaran.
                 'status_pembayaran' => (float) $lockedEvent->biaya <= 0 ? 'gratis' : 'belum_bayar',
             ]);
         }, 3);
@@ -134,7 +133,6 @@ class PublicEventController extends Controller
 
         return view('public.confirmation', compact('pendaftaran'));
     }
-
 
     public function attendanceForm()
     {
@@ -154,7 +152,7 @@ class PublicEventController extends Controller
             ->where('attendance_code', Str::upper(trim($validated['code'])))
             ->first();
 
-        if (! $pendaftaran || $pendaftaran->status_pendaftaran === 'ditolak') {
+        if (! $pendaftaran or $pendaftaran->status_pendaftaran === 'ditolak') {
             throw ValidationException::withMessages(['code' => 'Kode tidak valid atau pendaftaran tidak memenuhi syarat.']);
         }
 
