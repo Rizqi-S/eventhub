@@ -44,8 +44,10 @@ class EventHubDummySeeder extends Seeder
         ];
 
         $now = now();
+        $runTag = now()->format('YmdHis') . '_' . Str::lower(Str::random(4));
+        $globalCounter = 0;
 
-        DB::transaction(function () use ($locations, $topics, $institutions, $now) {
+        DB::transaction(function () use ($locations, $topics, $institutions, $now, $runTag, &$globalCounter) {
             for ($i = 1; $i <= 200; $i++) {
                 $loc = $locations[$i % count($locations)];
                 $lat = round($loc['lat'] + ((($i % 10) - 5) * 0.0018), 6);
@@ -72,7 +74,7 @@ class EventHubDummySeeder extends Seeder
                 $topic = $topics[$i % count($topics)];
                 $title = "{$topic} #{$i} - " . Str::before($loc['name'], ',');
                 $desc = "Sesi {$topic} ke-{$i} yang diselenggarakan di {$loc['name']}.";
-                $slug = Str::slug($title) . '-' . $i;
+                $slug = Str::slug($title) . '-' . $i . '-' . $runTag;
 
                 $rawEvent = [
                     'nama_event'      => $title,
@@ -119,51 +121,59 @@ class EventHubDummySeeder extends Seeder
                 $registrantCount = random_int(15, 85);
 
                 for ($p = 1; $p <= $registrantCount; $p++) {
+                    $globalCounter++;
                     $pesertaName = "Peserta Event {$i} - {$p}";
-                    $pesertaEmail = "peserta.e{$i}.p{$p}.{$i}@example.test";
+                    $pesertaEmail = "peserta.{$runTag}.{$globalCounter}@example.test";
                     $pesertaPhone = '0859' . str_pad((string) random_int(10000000, 99999999), 8, '0', STR_PAD_LEFT);
                     $instansi = $institutions[($i + $p) % count($institutions)];
                     $registeredAt = $now->copy()->subDays(random_int(0, 14));
 
                     $pesertaId = null;
                     if (Schema::hasTable('pesertas')) {
-                        $pesertaData = [
-                            'nama'       => $pesertaName,
-                            'email'      => $pesertaEmail,
-                            'no_hp'      => $pesertaPhone,
-                            'instansi'   => $instansi,
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ];
+                        $existing = DB::table('pesertas')->where('email', $pesertaEmail)->first();
 
-                        foreach (['name' => $pesertaName, 'phone' => $pesertaPhone, 'telepon' => $pesertaPhone] as $col => $val) {
-                            if (Schema::hasColumn('pesertas', $col)) {
-                                $pesertaData[$col] = $val;
+                        if ($existing) {
+                            $pesertaId = $existing->id;
+                        } else {
+                            $pesertaData = [
+                                'nama'       => $pesertaName,
+                                'email'      => $pesertaEmail,
+                                'no_hp'      => $pesertaPhone,
+                                'instansi'   => $instansi,
+                                'created_at' => $now,
+                                'updated_at' => $now,
+                            ];
+
+                            foreach (['name' => $pesertaName, 'phone' => $pesertaPhone, 'telepon' => $pesertaPhone] as $col => $val) {
+                                if (Schema::hasColumn('pesertas', $col)) {
+                                    $pesertaData[$col] = $val;
+                                }
                             }
-                        }
 
-                        $pesertaId = DB::table('pesertas')->insertGetId($pesertaData);
+                            $pesertaId = DB::table('pesertas')->insertGetId($pesertaData);
+                        }
                     }
 
                     if (Schema::hasTable('pendaftarans')) {
                         $rawPendaftaran = [
-                            'event_id'         => $eventId,
-                            'peserta_id'       => $pesertaId,
-                            'nama'             => $pesertaName,
-                            'name'             => $pesertaName,
-                            'email'            => $pesertaEmail,
-                            'no_hp'            => $pesertaPhone,
-                            'phone'            => $pesertaPhone,
-                            'instansi'         => $instansi,
-                            'tanggal_daftar'   => $registeredAt,
-                            'waktu_daftar'     => $registeredAt,
-                            'registered_at'    => $registeredAt,
-                            'status'           => $status === 'completed' ? 'attended' : 'confirmed',
-                            'status_kehadiran' => $status === 'completed' ? 'hadir' : 'terdaftar',
-                            'public_token'     => Str::random(32),
-                            'attendance_code'  => strtoupper(Str::random(8)),
-                            'created_at'       => $now,
-                            'updated_at'       => $now,
+                            'event_id'           => $eventId,
+                            'peserta_id'         => $pesertaId,
+                            'nama'               => $pesertaName,
+                            'name'               => $pesertaName,
+                            'email'              => $pesertaEmail,
+                            'no_hp'              => $pesertaPhone,
+                            'phone'              => $pesertaPhone,
+                            'instansi'           => $instansi,
+                            'tanggal_daftar'     => $registeredAt,
+                            'waktu_daftar'       => $registeredAt,
+                            'registered_at'      => $registeredAt,
+                            'status'             => $status === 'completed' ? 'attended' : 'confirmed',
+                            'status_pendaftaran' => $status === 'completed' ? 'hadir' : 'terdaftar',
+                            'status_kehadiran'   => $status === 'completed' ? 'hadir' : 'terdaftar',
+                            'public_token'       => Str::random(32),
+                            'attendance_code'    => strtoupper(Str::random(8)),
+                            'created_at'         => $now,
+                            'updated_at'         => $now,
                         ];
 
                         $pendaftaranData = [];
