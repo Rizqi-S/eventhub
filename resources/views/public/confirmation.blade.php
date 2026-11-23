@@ -30,7 +30,16 @@
     @if(in_array($pendaftaran->status_pembayaran, ['lunas', 'gratis'], true))
         <a class="btn primary" href="{{ route('public.attendance.form') }}">Lakukan presensi</a>
     @elseif($pendaftaran->status_pembayaran === 'belum_bayar')
-        <p class="muted">Selesaikan pembayaran sebelum batas waktu agar slot event tetap tersedia.</p>
+        <p class="muted">
+            Selesaikan pembayaran sebelum batas waktu agar slot event tetap tersedia.
+        </p>
+
+        <form method="POST" action="{{ route('public.payment.pay', $pendaftaran->public_token) }}">
+            @csrf
+            <button type="submit" class="btn primary">
+                Bayar Sekarang
+            </button>
+        </form>
     @endif
     <a class="btn outline" href="{{ route('public.events.index') }}">Jelajahi event lainnya</a>
 </section>@endsection

@@ -8,12 +8,13 @@ class Pendaftaran extends Model
 {
     protected $fillable = [
         'public_token', 'attendance_code', 'tanggal_daftar', 'peserta_id', 'event_id',
-        'status_pembayaran', 'expires_at',
+        'status_pembayaran', 'expires_at','midtrans_order_id','snap_token','midtrans_transaction_id','payment_type','paid_at',
     ];
 
     protected $casts = [
         'tanggal_daftar' => 'date',
         'expires_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     public function peserta() { return $this->belongsTo(Peserta::class); }

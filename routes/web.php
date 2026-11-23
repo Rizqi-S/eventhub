@@ -11,6 +11,7 @@ use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PublicEventController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MidtransPaymentController;
 
 // PUBLIC: Guest dapat mengakses tanpa akun.
 Route::get('/', [PublicEventController::class, 'home'])->name('home');
@@ -21,6 +22,15 @@ Route::post('/events/{event}/register', [PublicEventController::class, 'storeReg
 Route::get('/registration/confirmation/{token}', [PublicEventController::class, 'confirmation'])->name('public.registration.confirmation');
 Route::get('/presensi', [PublicEventController::class, 'attendanceForm'])->name('public.attendance.form');
 Route::post('/presensi', [PublicEventController::class, 'submitAttendance'])->middleware('throttle:10,1')->name('public.attendance.submit');
+Route::post(
+    '/registration/{token}/pay',
+    [MidtransPaymentController::class, 'pay']
+)->name('public.payment.pay');
+
+Route::post(
+    '/midtrans/notification',
+    [MidtransPaymentController::class, 'notification']
+)->name('midtrans.notification');
 
 // SUPER ADMIN authentication. Tidak ada public sign-up.
 Route::get('/admin/login', [SuperAdminAuthController::class, 'create'])->middleware('guest')->name('admin.login');
