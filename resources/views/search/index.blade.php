@@ -1,52 +1,63 @@
+
 @extends('layouts.admin')
-@section('title','Pencarian')
+
+@section('title', 'Hasil Pencarian')
+
 @section('content')
-<div class="page-heading">
-    <div>
-        <p class="eyebrow">GLOBAL SEARCH</p>
-        <h1>Hasil pencarian</h1>
-        <p class="muted">{{ $term !== '' ? 'Kata kunci: '.$term : 'Cari data dari seluruh modul EventHub.' }}</p>
-    </div>
+<div class="page-header">
+    <h1>Hasil Pencarian</h1>
+    <p>
+        Kata kunci:
+        <strong>{{ $q ?: 'Belum ada pencarian' }}</strong>
+    </p>
 </div>
-<form class="filter-bar" method="GET">
-    <input name="q" value="{{ $term }}" placeholder="Nama event, peserta, atau email...">
-    <button class="btn primary">Cari</button>
-</form>
-@if($term !== '')
-<div class="search-results">
-    <section class="panel">
-        <h2>Events</h2>
-        @forelse($events as $item)
-        <a class="search-item" href="{{ route('events.show',$item) }}">
-            <b>{{ $item->nama_event }}</b>
-            <small>{{ $item->lokasi }}</small>
-        </a>
+
+@if($q === '')
+    <p>Masukkan kata kunci pada kolom pencarian di bagian atas.</p>
+@else
+    <section class="search-results">
+        <h2>Events ({{ $events->count() }})</h2>
+
+        @forelse($events as $event)
+            <p>
+                <a href="{{ route('events.edit', $event->id) }}">
+                    {{ $event->nama_event }}
+                </a>
+                — {{ $event->lokasi }}
+            </p>
         @empty
-        <p class="muted">Tidak ada event.</p>
+            <p>Tidak ada event ditemukan.</p>
+        @endforelse
+
+        <hr>
+
+        <h2>Peserta ({{ $pesertas->count() }})</h2>
+
+        @forelse($pesertas as $peserta)
+            <p>
+                <a href="{{ route('pesertas.edit', $peserta->id) }}">
+                    {{ $peserta->nama }}
+                </a>
+                — {{ $peserta->email }}
+            </p>
+        @empty
+            <p>Tidak ada peserta ditemukan.</p>
+        @endforelse
+
+        <hr>
+
+        <h2>Pendaftaran ({{ $pendaftarans->count() }})</h2>
+
+        @forelse($pendaftarans as $pendaftaran)
+            <p>
+                Kode: {{ $pendaftaran->attendance_code ?? '-' }}<br>
+                Peserta: {{ $pendaftaran->peserta?->nama ?? '-' }}<br>
+                Event: {{ $pendaftaran->event?->nama_event ?? '-' }}<br>
+                Status: {{ $pendaftaran->status_pembayaran }}
+            </p>
+        @empty
+            <p>Tidak ada pendaftaran ditemukan.</p>
         @endforelse
     </section>
-    <section class="panel">
-        <h2>Peserta</h2>
-        @forelse($pesertas as $item)
-        <a class="search-item" href="{{ route('pesertas.index',['search'=>$item->email]) }}">
-            <b>{{ $item->nama }}</b>
-            <small>{{ $item->email }}</small>
-        </a>
-        @empty
-        <p class="muted">Tidak ada peserta.</p>
-        @endforelse
-    </section>
-    <section class="panel">
-        <h2>Pendaftaran</h2>
-        @forelse($pendaftarans as $item)
-        <a class="search-item" href="{{ route('pendaftarans.index') }}">
-            <b>{{ $item->peserta?->nama }} · {{ $item->event?->nama_event }}</b>
-            <small>{{ str_replace('_', ' ', $item->status_pembayaran) }}</small>
-        </a>
-        @empty
-        <p class="muted">Tidak ada pendaftaran.</p>
-        @endforelse
-    </section>
-</div>
 @endif
 @endsection

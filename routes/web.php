@@ -11,6 +11,7 @@ use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PublicEventController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MidtransPaymentController;
+use App\Http\Controllers\GlobalSearchController;
 
 // PUBLIC: Guest dapat mengakses tanpa akun.
 Route::get('/', [PublicEventController::class, 'home'])->name('home');
@@ -40,7 +41,9 @@ Route::post('/admin/logout', [SuperAdminAuthController::class, 'destroy'])->midd
 Route::middleware(['auth', 'superadmin'])->prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
-
+    Route::get('/search', [GlobalSearchController::class, 'index'])
+        ->name('search.index');
+        
     Route::prefix('data-management')->name('data-management.')->group(function () {
         Route::get('/', [DataManagementController::class, 'index'])->name('index');
         Route::post('/import', [DataManagementController::class, 'import'])->name('import');
