@@ -30,10 +30,6 @@ class AnalyticsController extends Controller
                 'total' => (int) ($dailyCounts[$date->toDateString()] ?? 0),
             ]);
 
-        $registrationStatus = Pendaftaran::query()
-            ->select('status_pendaftaran', DB::raw('COUNT(*) as total'))
-            ->groupBy('status_pendaftaran')->pluck('total', 'status_pendaftaran');
-
         $paymentStatus = Pendaftaran::query()
             ->select('status_pembayaran', DB::raw('COUNT(*) as total'))
             ->groupBy('status_pembayaran')->pluck('total', 'status_pembayaran');
@@ -44,7 +40,7 @@ class AnalyticsController extends Controller
             ->groupBy('status_kehadiran')->pluck('total', 'status_kehadiran');
 
         return view('analytics.index', compact(
-            'period', 'daily', 'registrationStatus', 'paymentStatus', 'eventStats', 'attendance'
+            'period', 'daily', 'paymentStatus', 'eventStats', 'attendance'
         ));
     }
 }

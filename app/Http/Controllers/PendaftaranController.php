@@ -26,7 +26,7 @@ class PendaftaranController extends Controller
             });
 
         $totalPendaftaran = (clone $query)->count();
-        $menunggu = (clone $query)->where('status_pendaftaran', 'menunggu')->count();
+        $menunggu = (clone $query)->where('status_pembayaran', 'belum_bayar')->where('expires_at', '>', now())->count();
         $pendaftarans = $query->orderBy('tanggal_daftar', $sort === 'terlama' ? 'asc' : 'desc')
             ->paginate(10)->withQueryString();
 
@@ -37,24 +37,27 @@ class PendaftaranController extends Controller
     {
         $pesertas = Peserta::all();
         $events = Event::all();
-
         return view('pendaftarans.create', compact('pesertas', 'events'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'tanggal_daftar' => 'required|date',
-            'peserta_id' => 'required|integer',
-            'event_id' => 'required|integer',
-            'status_pendaftaran' => 'required|string',
-            'status_pembayaran' => 'required|string',
+        $validated = $request->validate([
+            'tanggal_daftar' => ['required', 'date'],
+            'peserta_id' => ['required', 'integer', 'exists:pesertas,id'],
+            'event_id' => ['required', 'integer', 'exists:events,id'],
+            'status_pembayaran' => ['required', 'in:belum_bayar,lunas,kedaluwarsa,gratis'],
         ]);
 
-        Pendaftaran::create($request->all());
+        $event = Event::findOrFail($validated['event_id']);
+        $validated['expires_at'] = $validated['status_pembayaran'] === 'belum_bayar' ? now()->addMinutes(15) : null;
+        if ((float) $event->biaya <= 0) {
+            $validated['status_pembayaran'] = 'gratis';
+            $validated['expires_at'] = null;
+        }
+        Pendaftaran::create($validated);
 
-        return redirect()->route('pendaftarans.index')
-            ->with('success', 'Pendaftaran berhasil ditambahkan!');
+        return redirect()->route('pendaftarans.index')->with('success', 'Pendaftaran berhasil ditambahkan!');
     }
 
     public function edit($id)
@@ -62,40 +65,31 @@ class PendaftaranController extends Controller
         $pendaftaran = Pendaftaran::findOrFail($id);
         $pesertas = Peserta::all();
         $events = Event::all();
-
         return view('pendaftarans.edit', compact('pendaftaran', 'pesertas', 'events'));
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'tanggal_daftar' => 'required|date',
-            'peserta_id' => 'required|integer',
-            'event_id' => 'required|integer',
-            'status_pendaftaran' => 'required|string',
-            'status_pembayaran' => 'required|string',
+        $validated = $request->validate([
+            'tanggal_daftar' => ['required', 'date'],
+            'peserta_id' => ['required', 'integer', 'exists:pesertas,id'],
+            'event_id' => ['required', 'integer', 'exists:events,id'],
+            'status_pembayaran' => ['required', 'in:belum_bayar,lunas,kedaluwarsa,gratis'],
         ]);
 
-        $pendaftaran = Pendaftaran::findOrFail($id);
+        $event = Event::findOrFail($validated['event_id']);
+        if ((float) $event->biaya <= 0) {
+            $validated['status_pembayaran'] = 'gratis';
+        }
+        $validated['expires_at'] = $validated['status_pembayaran'] === 'belum_bayar' ? now()->addMinutes(15) : null;
 
-        $pendaftaran->update($request->only([
-            'tanggal_daftar',
-            'peserta_id',
-            'event_id',
-            'status_pendaftaran',
-            'status_pembayaran',
-        ]));
-
-        return redirect()->route('pendaftarans.index')
-            ->with('success', 'Pendaftaran berhasil diperbarui!');
+        Pendaftaran::findOrFail($id)->update($validated);
+        return redirect()->route('pendaftarans.index')->with('success', 'Pendaftaran berhasil diperbarui!');
     }
 
     public function destroy($id)
     {
-        $pendaftaran = Pendaftaran::findOrFail($id);
-        $pendaftaran->delete();
-
-        return redirect()->route('pendaftarans.index')
-            ->with('success', 'Pendaftaran berhasil dihapus!');
+        Pendaftaran::findOrFail($id)->delete();
+        return redirect()->route('pendaftarans.index')->with('success', 'Pendaftaran berhasil dihapus!');
     }
 }

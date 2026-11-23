@@ -20,10 +20,17 @@
             <strong>{{ $pendaftaran->event->nama_event }}</strong>
         </div>
         <div>
-            <small>STATUS</small>
-            <strong>{{ ucfirst($pendaftaran->status_pendaftaran) }}</strong>
+            <small>STATUS PEMBAYARAN</small>
+            <strong>{{ ucfirst(str_replace('_', ' ', $pendaftaran->status_pembayaran)) }}</strong>
+            @if($pendaftaran->status_pembayaran === 'belum_bayar' && $pendaftaran->expires_at)
+                <small>Batas pembayaran: {{ $pendaftaran->expires_at->format('d M Y H:i') }}</small>
+            @endif
         </div>
     </div>
-    <a class="btn primary" href="{{ route('public.attendance.form') }}">Lakukan presensi</a>
+    @if(in_array($pendaftaran->status_pembayaran, ['lunas', 'gratis'], true))
+        <a class="btn primary" href="{{ route('public.attendance.form') }}">Lakukan presensi</a>
+    @elseif($pendaftaran->status_pembayaran === 'belum_bayar')
+        <p class="muted">Selesaikan pembayaran sebelum batas waktu agar slot event tetap tersedia.</p>
+    @endif
     <a class="btn outline" href="{{ route('public.events.index') }}">Jelajahi event lainnya</a>
 </section>@endsection

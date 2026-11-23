@@ -61,23 +61,6 @@
         <section class="panel">
             <div class="panel-heading">
                 <div>
-                    <p class="eyebrow">REGISTRATION</p>
-                    <h2>Status Pendaftaran</h2>
-                </div>
-            </div>
-
-            <div class="chart-wrap">
-                @if($registrationStatus->isEmpty())
-                    <div class="empty-state">Belum ada data status pendaftaran.</div>
-                @else
-                    <canvas id="registrationChart"></canvas>
-                @endif
-            </div>
-        </section>
-
-        <section class="panel">
-            <div class="panel-heading">
-                <div>
                     <p class="eyebrow">PAYMENT</p>
                     <h2>Status Pembayaran</h2>
                 </div>
@@ -223,7 +206,6 @@
         };
 
         makeDoughnut('attendanceChart', @json($attendance));
-        makeDoughnut('registrationChart', @json($registrationStatus));
         makeDoughnut('paymentChart', @json($paymentStatus));
     });
     </script>

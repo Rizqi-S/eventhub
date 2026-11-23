@@ -41,7 +41,7 @@
         @forelse($pendaftarans as $item)
         <a class="search-item" href="{{ route('pendaftarans.index') }}">
             <b>{{ $item->peserta?->nama }} · {{ $item->event?->nama_event }}</b>
-            <small>{{ $item->status_pendaftaran }}</small>
+            <small>{{ str_replace('_', ' ', $item->status_pembayaran) }}</small>
         </a>
         @empty
         <p class="muted">Tidak ada pendaftaran.</p>

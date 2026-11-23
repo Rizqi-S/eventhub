@@ -92,29 +92,8 @@ class ITFestSeeder extends Seeder
                 'Nayla Azzahra',
             ];
 
-            // ==========================================
-            // 3. DISTRIBUSI STATUS PENDAFTARAN
-            // ==========================================
+            // Presensi dibuat acak untuk peserta dengan pembayaran lunas/gratis.
 
-            $statusPendaftaran = array_merge(
-                array_fill(0, 35, 'diterima'),
-                array_fill(0, 10, 'menunggu'),
-                array_fill(0, 5, 'ditolak')
-            );
-
-            // ==========================================
-            // 4. DISTRIBUSI STATUS KEHADIRAN
-            // ==========================================
-
-            $statusKehadiran = array_merge(
-                array_fill(0, 23, 'hadir'),
-                array_fill(0, 7, 'belum_hadir'),
-                array_fill(0, 2, 'izin'),
-                array_fill(0, 1, 'sakit'),
-                array_fill(0, 2, 'alpa')
-            );
-
-            $indexPresensi = 0;
 
             // ==========================================
             // 5. MEMBUAT 50 PESERTA DAN PENDAFTARAN
@@ -147,9 +126,6 @@ class ITFestSeeder extends Seeder
                     },
                 ]);
 
-                // Ambil status pendaftaran
-                $status = $statusPendaftaran[$index];
-
                 // Buat public token
                 $publicToken = (string) Str::uuid();
 
@@ -173,17 +149,17 @@ class ITFestSeeder extends Seeder
                         ->addDays($index % 20),
                     'peserta_id' => $peserta->id,
                     'event_id' => $event->id,
-                    'status_pendaftaran' => $status,
-                    'status_pembayaran' => 'belum_bayar',
+                    'status_pembayaran' => (float) $event->biaya <= 0 ? 'gratis' : (random_int(1, 100) <= 70 ? 'lunas' : 'kedaluwarsa'),
+                    'expires_at' => null,
                 ]);
 
                 // ======================================
                 // 6. PRESENSI KHUSUS PENDAFTARAN DITERIMA
                 // ======================================
 
-                if ($status === 'diterima') {
+                if (in_array($pendaftaran->status_pembayaran, ['lunas', 'gratis'], true)) {
 
-                    $kehadiran = $statusKehadiran[$indexPresensi];
+                    $kehadiran = random_int(1, 100) <= 65 ? 'hadir' : 'belum_hadir';
 
                     $waktuHadir = null;
 
@@ -213,16 +189,12 @@ class ITFestSeeder extends Seeder
             $this->command->info('Event       : 1');
             $this->command->info('Peserta     : 50');
             $this->command->info('Pendaftaran : 50');
-            $this->command->info('Diterima    : 35');
-            $this->command->info('Menunggu    : 10');
-            $this->command->info('Ditolak     : 5');
+            $this->command->info('Status pendaftaran: menggunakan status pembayaran');
             $this->command->info('Presensi    : 35');
             $this->command->info('====================================');
             $this->command->info('Hadir       : 23');
             $this->command->info('Belum Hadir : 7');
-            $this->command->info('Izin        : 2');
-            $this->command->info('Sakit       : 1');
-            $this->command->info('Alpa        : 2');
+
             $this->command->info('====================================');
         });
     }

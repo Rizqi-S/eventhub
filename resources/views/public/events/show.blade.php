@@ -32,6 +32,10 @@
         @if($event->latitude !== null && $event->longitude !== null)
             <h2 class="map-section-title">Lokasi Event</h2>
             <div id="public-event-map" class="public-event-map" data-latitude="{{ $event->latitude }}" data-longitude="{{ $event->longitude }}"></div>
+            <div class="map-navigation-links" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                <a class="btn primary" href="https://www.google.com/maps/dir/?api=1&amp;destination={{ $event->latitude }},{{ $event->longitude }}">Buka Google Maps</a>
+                <a class="btn outline" href="https://waze.com/ul?ll={{ $event->latitude }},{{ $event->longitude }}&amp;navigate=yes">Buka Waze</a>
+            </div>
             <small class="map-attribution-note">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a></small>
         @endif
     </article>

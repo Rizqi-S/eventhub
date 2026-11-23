@@ -3,37 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Peserta;
-use App\Models\Event;
-use App\Models\Presensi;
 
 class Pendaftaran extends Model
 {
     protected $fillable = [
-        'public_token',
-        'attendance_code',
-        'tanggal_daftar',
-        'peserta_id',
-        'event_id',
-        'status_pendaftaran',
-        'status_pembayaran',
+        'public_token', 'attendance_code', 'tanggal_daftar', 'peserta_id', 'event_id',
+        'status_pembayaran', 'expires_at',
     ];
 
-    // Relasi ke tabel Pesertas
-    public function peserta()
-    {
-        return $this->belongsTo(Peserta::class);
-    }
+    protected $casts = [
+        'tanggal_daftar' => 'date',
+        'expires_at' => 'datetime',
+    ];
 
-    // Relasi ke tabel Events
-    public function event()
-    {
-        return $this->belongsTo(Event::class);
-    }
+    public function peserta() { return $this->belongsTo(Peserta::class); }
+    public function event() { return $this->belongsTo(Event::class); }
+    public function presensi() { return $this->hasOne(Presensi::class); }
+    public function presensis() { return $this->hasOne(Presensi::class); }
 
-    // Relasi ke tabel Presensis
-    public function presensis()
+    public function isPaymentActive(): bool
     {
-        return $this->hasMany(Presensi::class);
+        return in_array($this->status_pembayaran, ['lunas', 'gratis'], true)
+            || ($this->status_pembayaran === 'belum_bayar' && $this->expires_at?->isFuture());
     }
 }

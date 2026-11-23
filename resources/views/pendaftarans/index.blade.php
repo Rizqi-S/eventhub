@@ -103,7 +103,7 @@
                 <th>Tanggal Daftar <a class="th-sort" title="Urutkan tanggal" href="{{ route('pendaftarans.index', array_merge(request()->query(), ['sort' => ($sort ?? 'terbaru') === 'terbaru' ? 'terlama' : 'terbaru'])) }}">⇅</a></th>
                 <th>Nama Peserta</th>
                 <th>Nama Event</th>
-                <th>Status Pendaftaran</th>
+                
                 <th>Status Pembayaran</th>
                 <th>Aksi</th>
             </tr>
@@ -118,14 +118,8 @@
                     <td>{{ $pendaftaran->event->nama_event ?? '-' }}</td>
 
                     <td>
-                        <span class="badge {{ strtolower($pendaftaran->status_pendaftaran) }}">
-                            {{ ucfirst($pendaftaran->status_pendaftaran) }}
-                        </span>
-                    </td>
-
-                    <td>
                         <span class="badge {{ strtolower($pendaftaran->status_pembayaran) }}">
-                            {{ str_replace('_', ' ', ucfirst($pendaftaran->status_pembayaran)) }}
+                            {{ ucfirst(str_replace('_', ' ', $pendaftaran->status_pembayaran)) }}
                         </span>
                     </td>
 

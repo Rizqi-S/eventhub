@@ -361,25 +361,14 @@ body { display:block !important; min-height:100vh; background:var(--bg) !importa
                     <small>Pilih event yang ingin diikuti peserta.</small>
                 </div>
 
-                <div class="form-row">
-
-                    <div class="form-group">
-                        <label>Status Pendaftaran</label>
-                        <select name="status_pendaftaran">
-                            <option value="menunggu" {{ old('status_pendaftaran', 'menunggu') == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-                            <option value="diterima" {{ old('status_pendaftaran') == 'diterima' ? 'selected' : '' }}>Diterima</option>
-                            <option value="ditolak" {{ old('status_pendaftaran') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Status Pembayaran</label>
-                        <select name="status_pembayaran">
-                            <option value="belum_bayar" {{ old('status_pembayaran', 'belum_bayar') == 'belum_bayar' ? 'selected' : '' }}>Belum Bayar</option>
-                            <option value="sudah_bayar" {{ old('status_pembayaran') == 'sudah_bayar' ? 'selected' : '' }}>Sudah Bayar</option>
-                        </select>
-                    </div>
-
+                <div class="form-group">
+                    <label>Status Pembayaran</label>
+                    <select name="status_pembayaran" required>
+                        <option value="belum_bayar" {{ old('status_pembayaran', 'belum_bayar') == 'belum_bayar' ? 'selected' : '' }}>Belum Bayar (15 menit)</option>
+                        <option value="lunas" {{ old('status_pembayaran') == 'lunas' ? 'selected' : '' }}>Lunas</option>
+                        <option value="kedaluwarsa" {{ old('status_pembayaran') == 'kedaluwarsa' ? 'selected' : '' }}>Kedaluwarsa</option>
+                        <option value="gratis" {{ old('status_pembayaran') == 'gratis' ? 'selected' : '' }}>Gratis</option>
+                    </select>
                 </div>
 
                 <div class="form-actions">
