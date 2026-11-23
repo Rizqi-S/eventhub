@@ -5,7 +5,6 @@ use App\Http\Controllers\Auth\SuperAdminAuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataManagementController;
 use App\Http\Controllers\EventController;
-use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\PresensiController;
@@ -41,8 +40,6 @@ Route::post('/admin/logout', [SuperAdminAuthController::class, 'destroy'])->midd
 Route::middleware(['auth', 'superadmin'])->prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
-
-    Route::get('/search', [GlobalSearchController::class, 'index'])->name('search.index');
 
     Route::prefix('data-management')->name('data-management.')->group(function () {
         Route::get('/', [DataManagementController::class, 'index'])->name('index');
