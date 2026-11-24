@@ -12,64 +12,164 @@ use Illuminate\Validation\ValidationException;
 
 class PublicEventController extends Controller
 {
+    /**
+     * Mengubah pembayaran pending yang sudah melewati batas waktu
+     * menjadi kedaluwarsa.
+     */
     private function expirePendingPayments(): void
     {
-        Pendaftaran::query()->where('status_pembayaran', 'belum_bayar')
-            ->whereNotNull('expires_at')->where('expires_at', '<=', now())
-            ->update(['status_pembayaran' => 'kedaluwarsa', 'updated_at' => now()]);
+        Pendaftaran::query()
+            ->where('status_pembayaran', 'belum_bayar')
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<=', now())
+            ->update([
+                'status_pembayaran' => 'kedaluwarsa',
+                'updated_at' => now(),
+            ]);
     }
 
+    /**
+     * Query pendaftaran yang masih menggunakan kuota event.
+     */
     private function activeRegistrationQuery(int $eventId)
     {
-        return Pendaftaran::query()->where('event_id', $eventId)
+        return Pendaftaran::query()
+            ->where('event_id', $eventId)
             ->where(function ($query) {
                 $query->whereIn('status_pembayaran', ['lunas', 'gratis'])
                     ->orWhere(function ($pending) {
-                        $pending->where('status_pembayaran', 'belum_bayar')->where('expires_at', '>', now());
+                        $pending->where('status_pembayaran', 'belum_bayar')
+                            ->where('expires_at', '>', now());
                     });
             });
     }
 
+    /**
+     * Memastikan event sudah disetujui dan dapat diakses publik.
+     */
+    private function ensureEventApproved(Event $event): void
+    {
+        abort_unless(
+            $event->submission_status === 'approved',
+            404
+        );
+    }
+
+    /**
+     * Homepage publik.
+     */
     public function home()
     {
         $this->expirePendingPayments();
-        $events = Event::query()->whereIn('status_event', ['aktif', 'berlangsung', 'ongoing', 'akan_datang'])
-            ->where('tanggal_mulai', '>=', now()->startOfDay())->withCount('pendaftarans')
-            ->orderBy('tanggal_mulai')->take(6)->get();
+
+        $events = Event::query()
+            ->where('submission_status', 'approved')
+            ->whereIn('status_event', [
+                'aktif',
+                'berlangsung',
+                'ongoing',
+                'akan_datang',
+            ])
+            ->where('tanggal_mulai', '>=', now()->startOfDay())
+            ->withCount('pendaftarans')
+            ->orderBy('tanggal_mulai')
+            ->take(6)
+            ->get();
+
         return view('public.home', compact('events'));
     }
 
+    /**
+     * Daftar seluruh event publik.
+     */
     public function index(Request $request)
     {
         $this->expirePendingPayments();
-        $events = Event::query()->whereIn('status_event', ['aktif', 'berlangsung', 'ongoing', 'akan_datang'])
+
+        $events = Event::query()
+            ->where('submission_status', 'approved')
+            ->whereIn('status_event', [
+                'aktif',
+                'berlangsung',
+                'ongoing',
+                'akan_datang',
+            ])
             ->where('tanggal_mulai', '>=', now()->startOfDay())
-            ->when($request->filled('q'), fn ($q) => $q->where(function ($sub) use ($request) {
+            ->when($request->filled('q'), function ($q) use ($request) {
                 $term = trim($request->string('q')->toString());
-                $sub->where('nama_event', 'like', "%{$term}%")->orWhere('lokasi', 'like', "%{$term}%");
-            }))
-            ->orderBy('tanggal_mulai')->paginate(9)->withQueryString();
+
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('nama_event', 'like', "%{$term}%")
+                        ->orWhere('lokasi', 'like', "%{$term}%");
+                });
+            })
+            ->orderBy('tanggal_mulai')
+            ->paginate(9)
+            ->withQueryString();
+
         return view('public.events.index', compact('events'));
     }
 
+    /**
+     * Detail event publik.
+     */
     public function show(Event $event)
     {
         $this->expirePendingPayments();
-        abort_unless(in_array($event->status_event, ['aktif', 'berlangsung', 'ongoing', 'akan_datang'], true), 404);
-        abort_if($event->tanggal_mulai->lt(now()->startOfDay()), 404);
+
+        $this->ensureEventApproved($event);
+
+        abort_unless(
+            in_array(
+                $event->status_event,
+                ['aktif', 'berlangsung', 'ongoing', 'akan_datang'],
+                true
+            ),
+            404
+        );
+
+        abort_if(
+            $event->tanggal_mulai->lt(now()->startOfDay()),
+            404
+        );
+
         $registered = $this->activeRegistrationQuery($event->id)->count();
+
         $remaining = max(0, $event->kuota - $registered);
+
         return view('public.events.show', compact('event', 'remaining'));
     }
 
+    /**
+     * Form pendaftaran event.
+     */
     public function register(Event $event)
     {
         $this->expirePendingPayments();
-        abort_unless(in_array($event->status_event, ['aktif', 'berlangsung', 'ongoing', 'akan_datang', 'selesai'], true), 404);
-        abort_if($this->activeRegistrationQuery($event->id)->count() >= $event->kuota, 410, 'Kuota event sudah penuh.');
+
+        $this->ensureEventApproved($event);
+
+        abort_unless(
+            in_array(
+                $event->status_event,
+                ['aktif', 'berlangsung', 'ongoing', 'akan_datang'],
+                true
+            ),
+            404
+        );
+
+        abort_if(
+            $this->activeRegistrationQuery($event->id)->count() >= $event->kuota,
+            410,
+            'Kuota event sudah penuh.'
+        );
+
         return view('public.events.register', compact('event'));
     }
 
+    /**
+     * Memproses pendaftaran peserta.
+     */
     public function storeRegistration(Request $request, Event $event)
     {
         $validated = $request->validate([
@@ -85,27 +185,65 @@ class PublicEventController extends Controller
 
         $pendaftaran = DB::transaction(function () use ($validated, $event) {
             $this->expirePendingPayments();
-            $lockedEvent = Event::query()->lockForUpdate()->findOrFail($event->id);
-            if (! in_array($lockedEvent->status_event, ['aktif', 'berlangsung', 'ongoing', 'akan_datang'], true)
-                || $lockedEvent->tanggal_mulai->lt(now()->startOfDay())) {
-                throw ValidationException::withMessages(['event' => 'Pendaftaran event ini sudah ditutup.']);
+
+            $lockedEvent = Event::query()
+                ->lockForUpdate()
+                ->findOrFail($event->id);
+
+            // Pengamanan moderasi.
+            if ($lockedEvent->submission_status !== 'approved') {
+                throw ValidationException::withMessages([
+                    'event' => 'Event ini belum disetujui oleh administrator.',
+                ]);
             }
 
-            if ($this->activeRegistrationQuery($lockedEvent->id)->count() >= $lockedEvent->kuota) {
-                throw ValidationException::withMessages(['event' => 'Maaf, kuota event sudah penuh.']);
+            if (
+                !in_array(
+                    $lockedEvent->status_event,
+                    ['aktif', 'berlangsung', 'ongoing', 'akan_datang'],
+                    true
+                )
+                || $lockedEvent->tanggal_mulai->lt(now()->startOfDay())
+            ) {
+                throw ValidationException::withMessages([
+                    'event' => 'Pendaftaran event ini sudah ditutup.',
+                ]);
             }
 
-            $peserta = Peserta::firstOrCreate(['email' => strtolower($validated['email'])], [
-                'nama' => $validated['nama'], 'no_hp' => $validated['no_hp'], 'instansi' => $validated['instansi'],
-            ]);
+            if (
+                $this->activeRegistrationQuery($lockedEvent->id)->count()
+                >= $lockedEvent->kuota
+            ) {
+                throw ValidationException::withMessages([
+                    'event' => 'Maaf, kuota event sudah penuh.',
+                ]);
+            }
 
-            $alreadyRegistered = $this->activeRegistrationQuery($lockedEvent->id)
-                ->where('peserta_id', $peserta->id)->exists();
+            $peserta = Peserta::firstOrCreate(
+                [
+                    'email' => strtolower($validated['email']),
+                ],
+                [
+                    'nama' => $validated['nama'],
+                    'no_hp' => $validated['no_hp'],
+                    'instansi' => $validated['instansi'],
+                ]
+            );
+
+            $alreadyRegistered = $this->activeRegistrationQuery(
+                $lockedEvent->id
+            )
+                ->where('peserta_id', $peserta->id)
+                ->exists();
+
             if ($alreadyRegistered) {
-                throw ValidationException::withMessages(['email' => 'Email ini sudah terdaftar pada event tersebut.']);
+                throw ValidationException::withMessages([
+                    'email' => 'Email ini sudah terdaftar pada event tersebut.',
+                ]);
             }
 
             $free = (float) $lockedEvent->biaya <= 0;
+
             return Pendaftaran::create([
                 'public_token' => (string) Str::uuid(),
                 'attendance_code' => Str::upper(Str::random(8)),
@@ -117,42 +255,94 @@ class PublicEventController extends Controller
             ]);
         }, 3);
 
-        return redirect()->route('public.registration.confirmation', $pendaftaran->public_token)
+        return redirect()
+            ->route(
+                'public.registration.confirmation',
+                $pendaftaran->public_token
+            )
             ->with('registration_email', $validated['email']);
     }
 
+    /**
+     * Halaman konfirmasi pendaftaran.
+     */
     public function confirmation(string $token)
     {
         $this->expirePendingPayments();
-        $pendaftaran = Pendaftaran::where('public_token', $token)->firstOrFail();
+
+        $pendaftaran = Pendaftaran::where(
+            'public_token',
+            $token
+        )->firstOrFail();
+
         $pendaftaran->load(['peserta', 'event']);
+
         return view('public.confirmation', compact('pendaftaran'));
     }
 
-    public function attendanceForm() { return view('public.attendance'); }
+    /**
+     * Form presensi publik.
+     */
+    public function attendanceForm()
+    {
+        return view('public.attendance');
+    }
 
+    /**
+     * Memproses presensi peserta.
+     */
     public function submitAttendance(Request $request)
     {
-        $validated = $request->validate(['code' => ['required', 'string', 'size:8']], [
-            'code.required' => 'Masukkan kode presensi.', 'code.size' => 'Kode presensi harus terdiri dari 8 karakter.',
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'size:8'],
+        ], [
+            'code.required' => 'Masukkan kode presensi.',
+            'code.size' => 'Kode presensi harus terdiri dari 8 karakter.',
         ]);
 
         $pendaftaran = Pendaftaran::with(['peserta', 'event'])
-            ->where('attendance_code', Str::upper(trim($validated['code'])))->first();
+            ->where(
+                'attendance_code',
+                Str::upper(trim($validated['code']))
+            )
+            ->first();
 
-        if (! $pendaftaran || ! in_array($pendaftaran->status_pembayaran, ['lunas', 'gratis'], true)) {
-            throw ValidationException::withMessages(['code' => 'Kode tidak valid atau pembayaran belum diselesaikan.']);
+        if (
+            !$pendaftaran
+            || !in_array(
+                $pendaftaran->status_pembayaran,
+                ['lunas', 'gratis'],
+                true
+            )
+        ) {
+            throw ValidationException::withMessages([
+                'code' => 'Kode tidak valid atau pembayaran belum diselesaikan.',
+            ]);
         }
 
         $presensi = $pendaftaran->presensis()->first();
+
         if ($presensi && $presensi->status_kehadiran === 'hadir') {
-            throw ValidationException::withMessages(['code' => 'Presensi untuk kode ini sudah tercatat.']);
+            throw ValidationException::withMessages([
+                'code' => 'Presensi untuk kode ini sudah tercatat.',
+            ]);
         }
+
         if ($presensi) {
-            $presensi->update(['status_kehadiran' => 'hadir', 'waktu_hadir' => now()]);
+            $presensi->update([
+                'status_kehadiran' => 'hadir',
+                'waktu_hadir' => now(),
+            ]);
         } else {
-            $pendaftaran->presensis()->create(['status_kehadiran' => 'hadir', 'waktu_hadir' => now()]);
+            $pendaftaran->presensis()->create([
+                'status_kehadiran' => 'hadir',
+                'waktu_hadir' => now(),
+            ]);
         }
-        return view('public.attendance-success', compact('pendaftaran'));
+
+        return view(
+            'public.attendance-success',
+            compact('pendaftaran')
+        );
     }
 }

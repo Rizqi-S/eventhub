@@ -17,12 +17,23 @@ class Event extends Model
         'kuota',
         'biaya',
         'status_event',
+
+        // Stage 2
         'poster_url',
         'poster_public_id',
         'contact_name',
         'contact_phone',
         'contact_email',
         'source_url',
+
+        // Stage 3
+        'submission_status',
+        'submitted_by_name',
+        'submitted_by_email',
+        'submitted_by_phone',
+        'review_notes',
+        'reviewed_at',
+        'reviewed_by',
     ];
 
     protected $casts = [
@@ -31,10 +42,16 @@ class Event extends Model
         'biaya' => 'decimal:2',
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
+        'reviewed_at' => 'datetime',
     ];
 
     public function pendaftarans()
     {
         return $this->hasMany(Pendaftaran::class);
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }
