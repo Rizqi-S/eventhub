@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#191919">
-    <title>@yield('title', 'EventHub') · EventHub</title>
+    <title>@yield('title', 'EventHub') &middot; EventHub</title>
     <meta name="description" content="Temukan kegiatan, seminar, workshop, dan event menarik bersama EventHub.">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
