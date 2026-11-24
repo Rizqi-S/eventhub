@@ -3,58 +3,61 @@
 @section('title', 'Data Presensi')
 
 @section('content')
-@push('styles')<style>.th-sort{display:inline-flex;align-items:center;justify-content:center;margin-left:5px;width:22px;height:22px;border:1px solid var(--border);border-radius:6px;color:var(--muted);text-decoration:none;font-size:13px;vertical-align:middle}.th-sort:hover{color:var(--teal);border-color:var(--teal);background:var(--surface-2)}</style>@endpush
-<div class="presensi-page">
-<div class="legacy-module-page">
 @push('styles')
+<style>
+    .th-sort {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 5px;
+        width: 22px;
+        height: 22px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+    .th-sort:hover {
+        color: var(--teal);
+        border-color: var(--teal);
+        background: var(--surface-2);
+    }
+</style>
 @endpush
 
+<div class="legacy-module-page">
+    <div class="header">
+        <div>
+            <h1>Data Presensi</h1>
+            <p>Kelola data kehadiran peserta EventHub.</p>
+        </div>
 
-
-<div class="page-header">
-    <div>
-        <h1>Data Presensi</h1>
-        <p>Kelola data kehadiran peserta EventHub.</p>
+        <a href="{{ route('presensis.create') }}" class="btn-add">
+            + Tambah Presensi
+        </a>
     </div>
 
-    <a href="{{ route('presensis.create') }}" class="btn-add">
-        + Tambah Presensi
-    </a>
-</div>
+    @if(isset($errors) && $errors->any())
+        <div class="alert error">
+            @foreach($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
 
-@if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-
-@if($errors->any())
-    <div class="alert alert-error">
-        @foreach($errors->all() as $error)
-            <div>{{ $error }}</div>
-        @endforeach
-    </div>
-@endif
-
-<div class="filter-card">
-    <h3>Pencarian dan Filter</h3>
-
-    <form action="{{ route('presensis.index') }}"
-          method="GET"
-          class="search-form">
-
+    <form action="{{ route('presensis.index') }}" method="GET" class="filter-bar">
         <input
             type="text"
             name="search"
             placeholder="Cari nama peserta atau event..."
             value="{{ request('search') }}">
 
-        <select name="status_kehadiran">
+        <select name="status_kehadiran" style="min-width: 170px;">
             <option value="">Semua Status</option>
-
             @foreach(['belum_hadir', 'hadir', 'izin', 'sakit', 'alpa'] as $status)
-                <option value="{{ $status }}"
-                    {{ request('status_kehadiran') == $status ? 'selected' : '' }}>
+                <option value="{{ $status }}" {{ request('status_kehadiran') == $status ? 'selected' : '' }}>
                     {{ ucfirst(str_replace('_', ' ', $status)) }}
                 </option>
             @endforeach
@@ -62,136 +65,92 @@
 
         <button type="submit" class="btn-search">Cari</button>
 
-        <a href="{{ route('presensis.index') }}" class="btn-reset">
-            Reset
-        </a>
+        @if(request()->filled('search') || request()->filled('status_kehadiran') || request()->filled('sort'))
+            <a href="{{ route('presensis.index') }}" class="btn-reset">
+                Reset
+            </a>
+        @endif
     </form>
-</div>
 
-<div class="table-card">
-    <h3>Daftar Kehadiran Peserta</h3>
+    <div class="table-card">
+        <h3>Daftar Kehadiran Peserta</h3>
 
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Nama Peserta</th>
-                    <th>Nama Event</th>
-                    <th>Waktu Hadir <a class="th-sort" title="Urutkan waktu hadir" href="{{ route('presensis.index', array_merge(request()->query(), ['sort' => ($sort ?? 'terbaru') === 'terbaru' ? 'terlama' : 'terbaru'])) }}">⇅</a></th>
-                    <th>Status Kehadiran</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @forelse($presensis as $presensi)
+        <div class="table-wrap">
+            <table>
+                <thead>
                     <tr>
-                        <td>
-                            {{ $presensis->firstItem() + $loop->index }}
-                        </td>
-
-                        <td>
-                            {{ data_get($presensi, 'pendaftaran.peserta.nama', '-') }}
-                        </td>
-
-                        <td>
-                            {{ data_get($presensi, 'pendaftaran.event.nama_event', '-') }}
-                        </td>
-
-                        <td>
-                            {{ $presensi->waktu_hadir
-                                ? $presensi->waktu_hadir->format('d/m/Y H:i')
-                                : '-' }}
-                        </td>
-
-                        <td>
-                            <span class="status-badge">
-                                {{ ucfirst(str_replace('_', ' ', $presensi->status_kehadiran)) }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <div class="actions">
-                                <a href="{{ route('presensis.show', $presensi->id) }}"
-                                   class="btn-detail">
-                                    Detail
-                                </a>
-
-                                <a href="{{ route('presensis.edit', $presensi->id) }}"
-                                   class="btn-edit">
-                                    Edit
-                                </a>
-
-                                <form action="{{ route('presensis.destroy', $presensi->id) }}"
-                                      method="POST"
-                                      onsubmit="return confirm('Yakin ingin menghapus presensi ini?')">
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit" class="btn-delete">
-                                        Hapus
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+                        <th>No</th>
+                        <th>Nama Peserta</th>
+                        <th>Nama Event</th>
+                        <th>
+                            Waktu Hadir
+                            <a class="th-sort" title="Urutkan waktu hadir" href="{{ route('presensis.index', array_merge(request()->query(), ['sort' => ($sort ?? 'terbaru') === 'terbaru' ? 'terlama' : 'terbaru'])) }}">⇅</a>
+                        </th>
+                        <th>Status Kehadiran</th>
+                        <th>Aksi</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="empty-state">
-                            @if($presensis->total() === 0 && !request()->filled('search') && !request()->filled('status_kehadiran'))
-                                Belum ada data presensi. Data akan muncul di sini setelah pendaftaran memiliki catatan kehadiran.
-                            @else
-                                Data presensi tidak ditemukan. Coba ubah kata kunci atau filter pencarian.
-                            @endif
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    @forelse($presensis as $presensi)
+                        <tr>
+                            <td>
+                                {{ $presensis->firstItem() + $loop->index }}
+                            </td>
+                            <td>
+                                {{ data_get($presensi, 'pendaftaran.peserta.nama', '-') }}
+                            </td>
+                            <td>
+                                {{ data_get($presensi, 'pendaftaran.event.nama_event', '-') }}
+                            </td>
+                            <td>
+                                {{ $presensi->waktu_hadir ? $presensi->waktu_hadir->format('d/m/Y H:i') : '-' }}
+                            </td>
+                            <td>
+                                <span class="status-badge">
+                                    {{ ucfirst(str_replace('_', ' ', $presensi->status_kehadiran)) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    <a href="{{ route('presensis.show', $presensi->id) }}" class="btn-detail">
+                                        Detail
+                                    </a>
+
+                                    <a href="{{ route('presensis.edit', $presensi->id) }}" class="btn-edit">
+                                        Edit
+                                    </a>
+
+                                    <form action="{{ route('presensis.destroy', $presensi->id) }}" method="POST"
+                                        onsubmit="return confirm('Yakin ingin menghapus presensi ini?')">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit" class="btn-delete">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="empty">
+                                @if($presensis->total() === 0 && !request()->filled('search') && !request()->filled('status_kehadiran'))
+                                    Belum ada data presensi. Data akan muncul di sini setelah pendaftaran memiliki catatan kehadiran.
+                                @else
+                                    Data presensi tidak ditemukan. Coba ubah kata kunci atau filter pencarian.
+                                @endif
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            {{ $presensis->links('vendor.pagination.eventhub') }}
+        </div>
     </div>
-
-    @if($presensis->hasPages())
-        @php
-            $currentPage = $presensis->currentPage();
-            $lastPage = $presensis->lastPage();
-            $startPage = max(1, $currentPage - 1);
-            $endPage = min($lastPage, $currentPage + 1);
-        @endphp
-        <nav class="eventhub-pagination" aria-label="Navigasi halaman presensi">
-            @if($presensis->onFirstPage())
-                <span class="page-control is-disabled" aria-disabled="true" aria-label="Halaman sebelumnya">«</span>
-            @else
-                <a class="page-control" href="{{ $presensis->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya">«</a>
-            @endif
-
-            @if($startPage > 1)
-                <a class="page-number" href="{{ $presensis->url(1) }}">1</a>
-                @if($startPage > 2)<span class="page-ellipsis" aria-hidden="true">…</span>@endif
-            @endif
-
-            @foreach(range($startPage, $endPage) as $page)
-                @if($page === $currentPage)
-                    <span class="page-number is-active" aria-current="page">{{ $page }}</span>
-                @else
-                    <a class="page-number" href="{{ $presensis->url($page) }}">{{ $page }}</a>
-                @endif
-            @endforeach
-
-            @if($endPage < $lastPage)
-                @if($endPage < $lastPage - 1)<span class="page-ellipsis" aria-hidden="true">…</span>@endif
-                <a class="page-number" href="{{ $presensis->url($lastPage) }}">{{ $lastPage }}</a>
-            @endif
-
-            @if($presensis->hasMorePages())
-                <a class="page-control" href="{{ $presensis->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya">»</a>
-            @else
-                <span class="page-control is-disabled" aria-disabled="true" aria-label="Halaman berikutnya">»</span>
-            @endif
-        </nav>
-    @endif
-</div>
-
-</div>
 </div>
 @endsection

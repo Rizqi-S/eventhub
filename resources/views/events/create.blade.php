@@ -3,8 +3,8 @@
 @section('title', 'Events')
 
 @section('content')
-<div class="legacy-module-page">
-<div class="header">
+    <div class="legacy-module-page">
+        <div class="header">
             <h1>Tambah Event</h1>
             <p>Tambahkan informasi event baru ke EventHub.</p>
         </div>
@@ -30,6 +30,6 @@
                 <button type="submit">Simpan Event</button>
                 <a href="{{ route('events.index') }}" class="back">Kembali</a>
             </form>
-</div>
+        </div>
+    </div>
 @endsection
-

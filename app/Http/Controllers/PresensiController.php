@@ -61,6 +61,7 @@ class PresensiController extends Controller
         $presensis = $query
             ->orderByRaw('waktu_hadir IS NULL ASC')
             ->orderBy('waktu_hadir', $sort === 'terlama' ? 'asc' : 'desc')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -102,6 +103,10 @@ class PresensiController extends Controller
                 ]),
             ],
         ]);
+
+        if ($validated['status_kehadiran'] === 'hadir' && empty($validated['waktu_hadir'])) {
+            $validated['waktu_hadir'] = now();
+        }
 
         Presensi::create($validated);
 
@@ -164,6 +169,12 @@ class PresensiController extends Controller
                 ]),
             ],
         ]);
+
+        if ($validated['status_kehadiran'] === 'hadir' && empty($validated['waktu_hadir'])) {
+            $validated['waktu_hadir'] = now();
+        } elseif ($validated['status_kehadiran'] !== 'hadir' && empty($validated['waktu_hadir'])) {
+            $validated['waktu_hadir'] = null;
+        }
 
         $presensi->update($validated);
 
