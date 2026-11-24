@@ -99,7 +99,7 @@
             </table>
 
             <div class="pagination">
-                {{ $events->links() }}
+                {{ $events->links('vendor.pagination.eventhub') }}
             </div>
 
         </div>

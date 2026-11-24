@@ -151,14 +151,7 @@
         </table>
     </div>
 
-    @if($presensis->hasPages())
-        <div class="pagination">
-            <div>
-                @if($presensis->onFirstPage())
-                    <span>Sebelumnya</span>
-                @else
-                    <a href="{{ $presensis->previousPageUrl() }}">Sebelumnya</a>
-                @endif
+    {{ $presensis->links('vendor.pagination.eventhub') }}
             </div>
 
             <span>

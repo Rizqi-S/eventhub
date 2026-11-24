@@ -72,7 +72,7 @@
             </table>
 
             <div class="pagination">
-                {{ $submissions->links() }}
+                {{ $submissions->links('vendor.pagination.eventhub') }}
             </div>
         </div>
     </div>

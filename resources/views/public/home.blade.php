@@ -38,7 +38,7 @@
                     @if($event->poster_url)
                         <img src="{{ $event->poster_url }}" alt="Poster {{ $event->nama_event }}" loading="lazy">
                     @else
-                        <div class="event-card-placeholder"><span>EVENTHUB</span><strong>{{ Str::limit($event->nama_event, 42) }}</strong></div>
+                        <div class="event-card-placeholder"><span class="placeholder-mark" aria-hidden="true">E</span><span class="placeholder-label">EVENTHUB</span></div>
                     @endif
                     <span class="event-card-date-badge">{{ $event->tanggal_mulai->format('d M Y') }}</span>
                 </a>

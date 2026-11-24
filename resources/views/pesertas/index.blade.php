@@ -55,7 +55,7 @@
         </table>
     </div>
     <div class="pagination-wrap">
-        {{ $pesertas->links() }}
+        {{ $pesertas->links('vendor.pagination.eventhub') }}
     </div>
 </section>
 @endsection

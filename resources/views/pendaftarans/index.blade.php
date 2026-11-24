@@ -154,7 +154,7 @@
 
 
         </section>
-        <div class="pagination-wrap">{{ $pendaftarans->links() }}</div>
+        <div class="pagination-wrap">{{ $pendaftarans->links('vendor.pagination.eventhub') }}</div>
 </div>
 @endsection
 
