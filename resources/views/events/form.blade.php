@@ -53,11 +53,37 @@
         @error('longitude')<small class="field-error">{{ $message }}</small>@enderror
     </div>
 
-    <label class="field full-width">
-        <span>Deskripsi</span>
-        <textarea name="deskripsi" rows="4" placeholder="Tuliskan deskripsi event">{{ old('deskripsi', $event->deskripsi ?? '') }}</textarea>
+    <div class="field full-width">
+        <span>Poster Event</span>
+        @if(!empty($event?->poster_url))
+            <img src="{{ $event->poster_url }}" alt="Poster {{ $event->nama_event }}" class="event-poster-preview" data-poster-preview>
+        @else
+            <img alt="Pratinjau poster event" class="event-poster-preview" data-poster-preview hidden>
+        @endif
+        <input type="file" name="poster" accept="image/jpeg,image/png,image/webp" data-poster-input>
+        <small class="field-hint">Format JPG, PNG, atau WebP. Maksimal 5 MB. File disimpan di Cloudinary.</small>
+        @error('poster')<small class="field-error">{{ $message }}</small>@enderror
+    </div>
+
+    <div class="field full-width">
+        <span>Deskripsi Event</span>
+        <input type="hidden" name="deskripsi" id="event-description" value="{{ old('deskripsi', $event->deskripsi ?? '') }}">
+        <div class="wysiwyg-shell">
+            <div id="event-description-editor" aria-label="Editor deskripsi event"></div>
+        </div>
+        <small class="field-hint">Gunakan toolbar untuk mengatur heading, format teks, daftar, dan tautan.</small>
         @error('deskripsi')<small class="field-error">{{ $message }}</small>@enderror
-    </label>
+    </div>
+
+    <div class="field full-width event-contact-fields">
+        <strong>Informasi Penyelenggara</strong>
+        <div class="event-form-grid">
+            <label class="field"><span>Nama Kontak</span><input type="text" name="contact_name" value="{{ old('contact_name', $event->contact_name ?? '') }}" maxlength="255" placeholder="Nama narahubung">@error('contact_name')<small class="field-error">{{ $message }}</small>@enderror</label>
+            <label class="field"><span>Nomor Kontak</span><input type="tel" name="contact_phone" value="{{ old('contact_phone', $event->contact_phone ?? '') }}" inputmode="tel" placeholder="08xxxxxxxxxx">@error('contact_phone')<small class="field-error">{{ $message }}</small>@enderror</label>
+            <label class="field"><span>Email Kontak</span><input type="email" name="contact_email" value="{{ old('contact_email', $event->contact_email ?? '') }}" placeholder="panitia@example.com">@error('contact_email')<small class="field-error">{{ $message }}</small>@enderror</label>
+            <label class="field"><span>Source Link</span><input type="url" name="source_url" value="{{ old('source_url', $event->source_url ?? '') }}" placeholder="https://instagram.com/...">@error('source_url')<small class="field-error">{{ $message }}</small>@enderror</label>
+        </div>
+    </div>
 
     <label class="field">
         <span>Tanggal Mulai</span>
@@ -96,12 +122,14 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
 .event-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 .event-form-grid>.full-width{grid-column:1/-1}
 .field{display:flex;flex-direction:column;gap:8px;color:var(--text);font-size:13px;font-weight:600;min-width:0}
 .field input,.field select,.field textarea{width:100%;min-height:44px;padding:12px 14px;background:#252525!important;color:#eee!important;border:1px solid #414141!important;border-radius:9px}
 .field textarea{resize:vertical;min-height:110px}
+.wysiwyg-shell{background:#252525;border:1px solid #414141;border-radius:9px;overflow:hidden}.wysiwyg-shell:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(85,214,194,.1)}#event-description-editor{min-height:190px;color:#eee}#event-description-editor .ql-editor{min-height:190px;font-size:13px;line-height:1.7}#event-description-editor .ql-toolbar.ql-snow{border:0;border-bottom:1px solid #414141;background:#303030}#event-description-editor .ql-container.ql-snow{border:0}#event-description-editor .ql-stroke{stroke:#ddd}#event-description-editor .ql-fill{fill:#ddd}#event-description-editor .ql-picker{color:#ddd}.event-poster-preview{display:block;max-width:360px;max-height:220px;object-fit:contain;object-position:left center;border:1px solid var(--border);border-radius:10px;background:#191919}.event-contact-fields{padding:17px;background:#202020;border:1px solid var(--border);border-radius:13px}.event-contact-fields>strong{font-size:13px}.event-contact-fields .event-form-grid{margin-top:14px}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal)!important;box-shadow:0 0 0 3px rgba(85,214,194,.1)}
 .field-hint{color:var(--muted);font-size:11px;font-weight:400;line-height:1.5}
 .field-error{color:#ff9696;font-size:11px}
@@ -134,8 +162,33 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
+(() => {
+    const editorElement = document.getElementById('event-description-editor');
+    const descriptionField = document.getElementById('event-description');
+    if (editorElement && descriptionField && window.Quill) {
+        const quill = new Quill(editorElement, {
+            theme: 'snow',
+            placeholder: 'Tuliskan deskripsi event...',
+            modules: { toolbar: [[{ header: [2, 3, false] }], ['bold', 'italic', 'underline'], [{ list: 'ordered' }, { list: 'bullet' }], ['blockquote', 'link'], ['clean']] }
+        });
+        if (descriptionField.value) quill.clipboard.dangerouslyPasteHTML(descriptionField.value);
+        const form = editorElement.closest('form');
+        if (form) form.addEventListener('submit', () => { descriptionField.value = quill.root.innerHTML; });
+    }
+    const posterInput = document.querySelector('[data-poster-input]');
+    const posterPreview = document.querySelector('[data-poster-preview]');
+    if (posterInput && posterPreview) posterInput.addEventListener('change', () => {
+        const file = posterInput.files && posterInput.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) return;
+        posterPreview.src = URL.createObjectURL(file);
+        posterPreview.hidden = false;
+    });
+})();
+
 (() => {
     'use strict';
 

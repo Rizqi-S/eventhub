@@ -28,11 +28,21 @@
             </div>
 
             <div class="detail-grid">
-
+                @if($event->poster_url)
+                    <div class="detail-item full"><label>Poster Event</label><img src="{{ $event->poster_url }}" alt="Poster {{ $event->nama_event }}" style="max-width:420px;max-height:280px;object-fit:contain;border-radius:12px"></div>
+                @endif
                 <div class="detail-item full">
                     <label>Deskripsi Event</label>
-                    <p class="description">{{ $event->deskripsi ?? 'Tidak ada deskripsi.' }}</p>
+                    <div class="description">{!! app(\App\Services\RichTextSanitizer::class)->clean($event->deskripsi) !!}</div>
                 </div>
+                @if($event->contact_name || $event->contact_phone || $event->contact_email || $event->source_url)
+                    <div class="detail-item full"><label>Kontak dan Sumber</label>
+                        @if($event->contact_name)<p>{{ $event->contact_name }}</p>@endif
+                        @if($event->contact_phone)<p>{{ $event->contact_phone }}</p>@endif
+                        @if($event->contact_email)<p>{{ $event->contact_email }}</p>@endif
+                        @if($event->source_url)<p><a href="{{ $event->source_url }}" target="_blank" rel="noopener noreferrer">{{ $event->source_url }}</a></p>@endif
+                    </div>
+                @endif
 
                 <div class="detail-item">
                     <label>Tanggal Mulai</label>

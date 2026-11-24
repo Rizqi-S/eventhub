@@ -75,10 +75,13 @@ class PublicEventController extends Controller
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'no_hp' => ['required', 'string', 'max:30'],
+            'no_hp' => ['required', 'string', 'regex:/^\+?[0-9]{8,15}$/'],
             'instansi' => ['required', 'string', 'max:255'],
             'agreement' => ['accepted'],
-        ], ['agreement.accepted' => 'Kamu harus menyetujui ketentuan pendaftaran.']);
+        ], [
+            'no_hp.regex' => 'Nomor HP harus berisi 8–15 digit dan boleh diawali tanda + (contoh: 081234567890 atau +6281234567890).',
+            'agreement.accepted' => 'Kamu harus menyetujui ketentuan pendaftaran.',
+        ]);
 
         $pendaftaran = DB::transaction(function () use ($validated, $event) {
             $this->expirePendingPayments();

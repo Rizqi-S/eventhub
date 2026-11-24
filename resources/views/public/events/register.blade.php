@@ -22,7 +22,8 @@
             <input type="email" name="email" value="{{ old('email') }}" required maxlength="255">
         </label>
         <label>Nomor HP
-            <input name="no_hp" value="{{ old('no_hp') }}" required maxlength="30">
+            <input type="tel" name="no_hp" value="{{ old('no_hp') }}" required minlength="8" maxlength="16" pattern="\+?[0-9]{8,15}" inputmode="tel" placeholder="081234567890">
+            <small class="muted">8–15 digit, boleh diawali +62.</small>
         </label>
         <label>Instansi
             <input name="instansi" value="{{ old('instansi') }}" required maxlength="255">

@@ -36,8 +36,10 @@ class PesertaController extends Controller
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:pesertas,email'],
-            'no_hp' => ['required', 'string', 'max:30'],
+            'no_hp' => ['required', 'string', 'regex:/^\+?[0-9]{8,15}$/'],
             'instansi' => ['required', 'string', 'max:255'],
+        ], [
+            'no_hp.regex' => 'Nomor HP harus berisi 8–15 digit dan boleh diawali tanda + (contoh: 081234567890 atau +6281234567890).',
         ]);
         Peserta::create($validated);
         return redirect()->route('pesertas.index')->with('success', 'Peserta berhasil ditambahkan.');
@@ -50,8 +52,10 @@ class PesertaController extends Controller
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('pesertas', 'email')->ignore($peserta->id)],
-            'no_hp' => ['required', 'string', 'max:30'],
+            'no_hp' => ['required', 'string', 'regex:/^\+?[0-9]{8,15}$/'],
             'instansi' => ['required', 'string', 'max:255'],
+        ], [
+            'no_hp.regex' => 'Nomor HP harus berisi 8–15 digit dan boleh diawali tanda + (contoh: 081234567890 atau +6281234567890).',
         ]);
         $peserta->update($validated);
         return redirect()->route('pesertas.index')->with('success', 'Data peserta berhasil diperbarui.');

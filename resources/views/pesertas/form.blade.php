@@ -11,7 +11,8 @@
     @enderror
 </label>
 <label>Nomor HP
-    <input name="no_hp" value="{{ old('no_hp',$peserta->no_hp ?? '') }}" required>
+    <input type="tel" name="no_hp" value="{{ old('no_hp',$peserta->no_hp ?? '') }}" required minlength="8" maxlength="16" pattern="\+?[0-9]{8,15}" inputmode="tel" placeholder="081234567890">
+    <small class="muted">8–15 digit, boleh diawali +62.</small>
     @error('no_hp')
     <small class="field-error">{{ $message }}</small>
     @enderror

@@ -17,7 +17,7 @@
                     <span class="event-date">{{ $event->tanggal_mulai->format('d M Y') }}</span>
                 </div>
                 <h3>{{ $event->nama_event }}</h3>
-                <p>{{ Str::limit($event->deskripsi,100) }}</p>
+                <p>{{ Str::limit(strip_tags($event->deskripsi),100) }}</p>
                 <div class="event-info">
                     <span>⌖ {{ $event->lokasi }}</span>
                     <strong>{{ $event->biaya > 0 ? 'Rp '.number_format($event->biaya,0,',','.') : 'Gratis' }}</strong>

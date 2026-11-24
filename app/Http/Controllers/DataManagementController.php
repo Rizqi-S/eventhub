@@ -73,7 +73,7 @@ class DataManagementController extends Controller
                 $row = $row->toArray();
                 $rules = match ($type) {
                     'events' => ['nama_event'=>'required|string|max:255','tanggal_mulai'=>'required|date','lokasi'=>'required|string|max:255','kuota'=>'required|integer|min:1','biaya'=>'required|numeric|min:0','status_event'=>'required|in:draft,aktif,berlangsung,selesai'],
-                    'pesertas' => ['nama'=>'required|string|max:255','email'=>'required|email|max:255','no_hp'=>'required|string|max:30','instansi'=>'required|string|max:255'],
+                    'pesertas' => ['nama'=>'required|string|max:255','email'=>'required|email|max:255','no_hp'=>['required','string','regex:/^\+?[0-9]{8,15}$/'],'instansi'=>'required|string|max:255'],
                     'pendaftarans' => ['tanggal_daftar'=>'required|date','email_peserta'=>'required|email','nama_event'=>'required|string','status_pembayaran'=>'required|in:belum_bayar,lunas,kedaluwarsa,gratis'],
                     'presensis' => ['pendaftaran_id'=>'required|integer|exists:pendaftarans,id','status_kehadiran'=>'required|in:belum_hadir,hadir,izin,sakit,alpa'],
                 };

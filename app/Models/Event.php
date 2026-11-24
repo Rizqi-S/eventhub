@@ -17,6 +17,12 @@ class Event extends Model
         'kuota',
         'biaya',
         'status_event',
+        'poster_url',
+        'poster_public_id',
+        'contact_name',
+        'contact_phone',
+        'contact_email',
+        'source_url',
     ];
 
     protected $casts = [
