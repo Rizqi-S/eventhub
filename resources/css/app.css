@@ -1882,8 +1882,8 @@ textarea:focus {
 
 .public-footer .footer-main {
     display: grid;
-    grid-template-columns: minmax(260px, 1.6fr) repeat(2, minmax(130px, 1fr));
-    gap: clamp(28px, 5vw, 72px);
+    grid-template-columns: minmax(240px, 1.4fr) repeat(3, minmax(130px, 1fr));
+    gap: clamp(24px, 4vw, 56px);
     width: min(1180px, 100%);
     margin: 0 auto;
     padding: 42px 0 34px;
@@ -1918,6 +1918,28 @@ textarea:focus {
 
 .public-footer .footer-links a:hover {
     color: var(--teal);
+}
+
+.footer-contact-item {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.footer-contact-item strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.public-footer .footer-links a.footer-wa-link {
+    color: var(--teal);
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.public-footer .footer-links a.footer-wa-link:hover {
+    color: var(--teal-hover);
+    text-decoration: underline;
 }
 
 .public-footer .footer-bottom {

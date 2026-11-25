@@ -52,6 +52,13 @@
                 <a href="{{ route('public.attendance.form') }}">Presensi</a>
                 <a href="{{ route('admin.login') }}">Admin</a>
             </div>
+            <div class="footer-links">
+                <strong>Kontak</strong>
+                <span class="footer-contact-item">Contact Person: <strong>Rizqi S.</strong></span>
+                <a class="footer-wa-link" href="https://wa.me/6285954177523" target="_blank" rel="noopener noreferrer">
+                    Phone / WhatsApp: +62 859 5417 7523
+                </a>
+            </div>
         </div>
         <div class="footer-bottom">
             <span>© {{ date('Y') }} EventHub. All rights reserved.</span>
