@@ -29,8 +29,13 @@
                 @include('events.form')
 
                 <div class="form-actions">
-                    <button type="submit">Simpan Perubahan</button>
-                    <a href="{{ route('events.index') }}" class="back">Kembali</a>
+                    <button type="submit" class="btn-save">
+                        Simpan Perubahan
+                    </button>
+
+                    <a href="{{ route('events.index') }}" class="back">
+                        Kembali
+                    </a>
                 </div>
             </form>
         </div>

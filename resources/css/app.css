@@ -2131,3 +2131,33 @@ textarea:focus {
         flex-direction: column;
     }
 }
+/* Event Edit - Save Button */
+.form-actions .btn-save {
+    background: #2dd4bf;
+    color: #0f2926;
+    border: 1px solid #2dd4bf;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-actions .btn-save:hover {
+    background: #14b8a6;
+    border-color: #14b8a6;
+    transform: translateY(-1px);
+}
+
+.form-actions .btn-save:active {
+    transform: translateY(0);
+}
+
+.form-actions .btn-save:disabled {
+    background: #28534e;
+    color: #a7c7c2;
+    border-color: #28534e;
+    cursor: not-allowed;
+    transform: none;
+}
