@@ -20,14 +20,13 @@
             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'is-current' : '' }}">Beranda</a>
             <a href="{{ route('public.events.index') }}" class="{{ request()->routeIs('public.events.*') ? 'is-current' : '' }}">Jelajahi Event</a>
             <a href="{{ route('public.attendance.form') }}" class="{{ request()->routeIs('public.attendance.*') ? 'is-current' : '' }}">Presensi</a>
+            <a href="{{ route('public.event-submissions.create') }}" class="{{ request()->routeIs('public.event-submissions.*') ? 'is-current' : '' }}">Ajukan Event</a>
         </nav>
 
         <div class="public-nav-actions">
-            <button type="button" class="btn outline" data-open-guide title="Guidelines" style="display:inline-flex;align-items:center;gap:6px;">
-                <img src="https://unpkg.com/lucide-static@0.542.0/icons/book-open.svg" alt="" width="15" height="15" style="filter:brightness(0) invert(1);">
-                <span>Guidelines</span>
+            <button type="button" class="btn outline" data-open-guide title="Guidelines" aria-label="Guidelines" style="display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;">
+                <img src="https://unpkg.com/lucide-static@0.542.0/icons/book-open.svg" alt="Guidelines" width="16" height="16" style="filter:brightness(0) invert(1);">
             </button>
-            <a class="public-submit-link" href="{{ route('public.event-submissions.create') }}">Ajukan Event <span aria-hidden="true">↗</span></a>
             <a class="btn outline public-admin-link" href="{{ route('admin.login') }}">Admin</a>
         </div>
     </header>
@@ -95,7 +94,7 @@
                 'badge' => 'AJUKAN EVENT',
                 'title' => 'Promosikan Event Komunitasmu',
                 'desc' => 'Klik Ajukan Event untuk mengirim detail acaramu: isi Nama Event, pilih titik lokasi di peta interaktif, unggah poster, tulis deskripsi, lengkapi kontak penyelenggara & data pengaju. Tim Admin akan meninjau sebelum dipublikasikan.',
-                'selector' => '.public-submit-link',
+                'selector' => '.public-nav nav a[href*="/ajukan-event"]',
             ],
             [
                 'badge' => 'GUIDELINES',
