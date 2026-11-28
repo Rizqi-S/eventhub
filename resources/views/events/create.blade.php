@@ -27,8 +27,10 @@
 
                 @include('events.form')
 
-                <button type="submit">Simpan Event</button>
-                <a href="{{ route('events.index') }}" class="back">Kembali</a>
+                <div class="form-actions">
+                    <a href="{{ route('events.index') }}" class="btn outline">Kembali</a>
+                    <button type="submit" class="btn primary">Simpan Event</button>
+                </div>
             </form>
         </div>
     </div>

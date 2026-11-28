@@ -1,5 +1,34 @@
 @extends('public.layout')
 @section('title','Pendaftaran '.$event->nama_event)
+@push('styles')
+<style>
+.form-section .stack-form {
+    margin-top: 20px;
+    padding: 24px;
+    background: var(--surface, #20242b);
+    border: 1px solid var(--border, #39414c);
+    border-radius: 16px;
+}
+.form-section .stack-form input:not([type="checkbox"]),
+.form-section .stack-form select,
+.form-section .stack-form textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 14px;
+    background: #252525;
+    color: #eee;
+    border: 1px solid #414141;
+    border-radius: 9px;
+}
+.form-section .stack-form input:not([type="checkbox"]):focus,
+.form-section .stack-form select:focus,
+.form-section .stack-form textarea:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(85, 214, 194, .1);
+}
+</style>
+@endpush
 @section('content')
 <section class="public-section form-section">
     <a class="text-link" href="{{ route('public.events.show',$event) }}">← Kembali ke detail event</a>

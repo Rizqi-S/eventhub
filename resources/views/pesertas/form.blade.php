@@ -1,3 +1,25 @@
+@push('styles')
+<style>
+.form-panel .stack-form input:not([type="checkbox"]),
+.form-panel .stack-form select,
+.form-panel .stack-form textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 14px;
+    background: #252525;
+    color: #eee;
+    border: 1px solid #414141;
+    border-radius: 9px;
+}
+.form-panel .stack-form input:not([type="checkbox"]):focus,
+.form-panel .stack-form select:focus,
+.form-panel .stack-form textarea:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(85, 214, 194, .1);
+}
+</style>
+@endpush
 <label>Nama lengkap
     <input name="nama" value="{{ old('nama',$peserta->nama ?? '') }}" required>
     @error('nama')
