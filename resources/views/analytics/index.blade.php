@@ -74,6 +74,23 @@
                 @endif
             </div>
         </section>
+
+        <section class="panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">REGISTRATIONS</p>
+                    <h2>Pendaftaran per Event</h2>
+                </div>
+            </div>
+
+            <div class="chart-wrap">
+                @if($eventStats->isEmpty())
+                    <div class="empty-state">Belum ada data event dan pendaftaran untuk ditampilkan.</div>
+                @else
+                    <canvas id="eventChart"></canvas>
+                @endif
+            </div>
+        </section>
     </div>
 
     <section class="panel">
@@ -207,6 +224,51 @@
 
         makeDoughnut('attendanceChart', @json($attendance));
         makeDoughnut('paymentChart', @json($paymentStatus));
+
+        const eventLabels = @json($eventStats->take(7)->pluck('nama_event'));
+        const eventValues = @json($eventStats->take(7)->pluck('pendaftarans_count'));
+        if (document.getElementById('eventChart')) new Chart(document.getElementById('eventChart'), {
+            type: 'bar',
+            data: {
+                labels: eventLabels,
+                datasets: [{
+                    label: 'Pendaftaran',
+                    data: eventValues,
+                    backgroundColor: '#55d6c2',
+                    borderRadius: 7,
+                    maxBarThickness: 34
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: labelsColor
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: labelsColor,
+                            precision: 0
+                        },
+                        grid: {
+                            color: gridColor
+                        }
+                    }
+                }
+            }
+        });
     });
     </script>
 @endpush

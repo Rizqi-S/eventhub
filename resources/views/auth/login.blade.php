@@ -31,7 +31,25 @@
                 </label>
                 <button class="btn primary full" type="submit">Masuk ke Dashboard</button>
             </form>
+            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border, #333);">
+                <p class="muted" style="font-size: 12px; margin: 0 0 10px;">Isi otomatis akun Admin:</p>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+                    <button type="button" class="btn" data-fill-email="admin1@eventhub.test" data-fill-password="Admin1Pass!2026">Admin 1</button>
+                    <button type="button" class="btn" data-fill-email="admin2@eventhub.test" data-fill-password="Admin2Pass!2026">Admin 2</button>
+                    <button type="button" class="btn" data-fill-email="admin3@eventhub.test" data-fill-password="Admin3Pass!2026">Admin 3</button>
+                </div>
+            </div>
             <a class="muted back-link" href="{{ route('home') }}">← Kembali ke website</a>
         </main>
+        <script>
+            document.querySelectorAll('[data-fill-email]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const emailInput = document.querySelector('input[name="email"]');
+                    const passwordInput = document.querySelector('input[name="password"]');
+                    if (emailInput) emailInput.value = button.dataset.fillEmail;
+                    if (passwordInput) passwordInput.value = button.dataset.fillPassword;
+                });
+            });
+        </script>
     </body>
 </html>

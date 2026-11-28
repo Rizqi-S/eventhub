@@ -109,6 +109,7 @@
         @error('biaya')<small class="field-error">{{ $message }}</small>@enderror
     </label>
 
+    @if(empty($hideStatus))
     <label class="field full-width">
         <span>Status Event</span>
         <select name="status_event" required>
@@ -118,6 +119,7 @@
         </select>
         @error('status_event')<small class="field-error">{{ $message }}</small>@enderror
     </label>
+    @endif
 </div>
 
 @push('styles')

@@ -38,6 +38,8 @@ class GuestEventSubmissionController extends Controller
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
 
             'lokasi' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'kuota' => 'required|integer|min:1',
             'biaya' => 'required|numeric|min:0',
 
@@ -105,6 +107,8 @@ class GuestEventSubmissionController extends Controller
                     'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
 
                     'lokasi' => $validated['lokasi'],
+                    'latitude' => $validated['latitude'] ?? null,
+                    'longitude' => $validated['longitude'] ?? null,
                     'kuota' => $validated['kuota'],
                     'biaya' => $validated['biaya'],
 
