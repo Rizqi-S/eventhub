@@ -23,6 +23,7 @@
         </nav>
 
         <div class="public-nav-actions">
+            <button type="button" class="btn outline" data-open-guide title="Panduan Penggunaan">? Panduan</button>
             <a class="public-submit-link" href="{{ route('public.event-submissions.create') }}">Ajukan Event <span aria-hidden="true">↗</span></a>
             <a class="btn outline public-admin-link" href="{{ route('admin.login') }}">Admin</a>
         </div>
@@ -66,6 +67,31 @@
         </div>
     </footer>
 
+    @include('components.onboarding-guide', [
+        'storageKey' => 'eventhub_guest_guide_seen',
+        'steps' => [
+            [
+                'badge' => 'SELAMAT DATANG',
+                'title' => 'Jelajahi Event di EventHub',
+                'desc' => 'Temukan berbagai seminar, workshop, dan kegiatan menarik melalui halaman Beranda atau menu Jelajahi Event.',
+            ],
+            [
+                'badge' => 'PENDAFTARAN',
+                'title' => 'Daftar Event dengan Mudah',
+                'desc' => 'Pilih event yang kamu minati, klik Daftar Sekarang, isi data dirimu, dan selesaikan pembayaran jika event berbayar.',
+            ],
+            [
+                'badge' => 'PRESENSI',
+                'title' => 'Konfirmasi Kehadiran',
+                'desc' => 'Setelah mendaftar, kamu akan menerima kode presensi 8 karakter. Gunakan kode tersebut di menu Presensi saat hari acara.',
+            ],
+            [
+                'badge' => 'KOMUNITAS',
+                'title' => 'Ajukan Event Kamu Sendiri',
+                'desc' => 'Punya acara yang ingin dipromosikan? Klik Ajukan Event di pojok kanan atas untuk mengirim detail acara ke tim EventHub.',
+            ],
+        ],
+    ])
     @stack('scripts')
 </body>
 </html>

@@ -47,6 +47,7 @@
                 <form class="global-search" action="{{ route('search.index') }}" method="GET"><span>⌕</span><input
                         name="q" value="{{ request('q') }}"
                         placeholder="Cari event, peserta, pendaftaran..."><kbd>Enter</kbd></form>
+                <button type="button" class="btn outline small" data-open-guide title="Panduan Admin">? Panduan</button>
                 <a class="public-link" href="{{ route('home') }}" target="_blank" rel="noopener">Lihat website ↗</a>
             </header>
             <section class="page-content">
@@ -58,6 +59,31 @@
             </section>
         </main>
     </div>
+    @include('components.onboarding-guide', [
+        'storageKey' => 'eventhub_admin_guide_seen',
+        'steps' => [
+            [
+                'badge' => 'DASHBOARD & ANALITIK',
+                'title' => 'Pantau Ringkasan & Tren',
+                'desc' => 'Gunakan Dashboard untuk melihat statistik cepat dan Analitik untuk memantau tren pendaftaran, status pembayaran, serta grafik per event.',
+            ],
+            [
+                'badge' => 'EVENTS',
+                'title' => 'Kelola Event & Titik Peta',
+                'desc' => 'Buat atau edit event melalui menu Events. Kamu dapat mencari lokasi langsung di peta interaktif, mengunggah poster, dan mengatur kuota.',
+            ],
+            [
+                'badge' => 'MODERASI',
+                'title' => 'Tinjau Pengajuan Event Tamu',
+                'desc' => 'Buka menu Pengajuan Event untuk menyetujui atau menolak event yang diajukan oleh pengunjung sebelum tampil di halaman publik.',
+            ],
+            [
+                'badge' => 'OPERASIONAL',
+                'title' => 'Peserta, Presensi & Import/Export',
+                'desc' => 'Kelola data peserta, verifikasi pendaftaran, catat presensi, atau lakukan Import/Export data melalui menu Tools.',
+            ],
+        ],
+    ])
     @stack('scripts')
 </body>
 
