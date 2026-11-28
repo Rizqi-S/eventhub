@@ -74,21 +74,25 @@
                 'badge' => 'SELAMAT DATANG',
                 'title' => 'Jelajahi Event di EventHub',
                 'desc' => 'Temukan berbagai seminar, workshop, dan kegiatan menarik melalui halaman Beranda atau menu Jelajahi Event.',
-            ],
-            [
-                'badge' => 'PENDAFTARAN',
-                'title' => 'Daftar Event dengan Mudah',
-                'desc' => 'Pilih event yang kamu minati, klik Daftar Sekarang, isi data dirimu, dan selesaikan pembayaran jika event berbayar.',
+                'selector' => '.public-nav nav a[href*="/events"]',
             ],
             [
                 'badge' => 'PRESENSI',
                 'title' => 'Konfirmasi Kehadiran',
                 'desc' => 'Setelah mendaftar, kamu akan menerima kode presensi 8 karakter. Gunakan kode tersebut di menu Presensi saat hari acara.',
+                'selector' => '.public-nav nav a[href*="/presensi"]',
             ],
             [
                 'badge' => 'KOMUNITAS',
                 'title' => 'Ajukan Event Kamu Sendiri',
                 'desc' => 'Punya acara yang ingin dipromosikan? Klik Ajukan Event di pojok kanan atas untuk mengirim detail acara ke tim EventHub.',
+                'selector' => '.public-submit-link',
+            ],
+            [
+                'badge' => 'PANDUAN',
+                'title' => 'Buka Ulang Kapan Saja',
+                'desc' => 'Klik tombol Panduan ini kapan saja jika kamu ingin melihat kembali langkah-langkah penggunaan EventHub.',
+                'selector' => '[data-open-guide]',
             ],
         ],
     ])
