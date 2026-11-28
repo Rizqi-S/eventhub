@@ -23,7 +23,10 @@
         </nav>
 
         <div class="public-nav-actions">
-            <button type="button" class="btn outline" data-open-guide title="Panduan Penggunaan">? Panduan</button>
+            <button type="button" class="btn outline" data-open-guide title="Guidelines" style="display:inline-flex;align-items:center;gap:6px;">
+                <img src="https://unpkg.com/lucide-static@0.542.0/icons/book-open.svg" alt="" width="15" height="15" style="filter:brightness(0) invert(1);">
+                <span>Guidelines</span>
+            </button>
             <a class="public-submit-link" href="{{ route('public.event-submissions.create') }}">Ajukan Event <span aria-hidden="true">↗</span></a>
             <a class="btn outline public-admin-link" href="{{ route('admin.login') }}">Admin</a>
         </div>
@@ -71,27 +74,33 @@
         'storageKey' => 'eventhub_guest_guide_seen',
         'steps' => [
             [
-                'badge' => 'SELAMAT DATANG',
-                'title' => 'Jelajahi Event di EventHub',
-                'desc' => 'Temukan berbagai seminar, workshop, dan kegiatan menarik melalui halaman Beranda atau menu Jelajahi Event.',
+                'badge' => 'JELAJAHI EVENT',
+                'title' => 'Temukan & Filter Event',
+                'desc' => 'Buka menu Jelajahi Event untuk melihat seluruh acara yang tersedia. Kamu bisa mencari event, melihat tanggal, lokasi peta, kuota tersisa, serta biaya pendaftaran.',
                 'selector' => '.public-nav nav a[href*="/events"]',
             ],
             [
-                'badge' => 'PRESENSI',
-                'title' => 'Konfirmasi Kehadiran',
-                'desc' => 'Setelah mendaftar, kamu akan menerima kode presensi 8 karakter. Gunakan kode tersebut di menu Presensi saat hari acara.',
+                'badge' => 'PENDAFTARAN & PEMBAYARAN',
+                'title' => 'Cara Mendaftar Event',
+                'desc' => 'Di halaman detail event, klik Daftar Sekarang lalu isi Nama Lengkap, Email aktif, Nomor HP (8–15 digit), dan Instansi. Untuk event berbayar, lanjutkan pembayaran langsung melalui Midtrans.',
+                'selector' => '.public-nav nav a[href*="/events"]',
+            ],
+            [
+                'badge' => 'PRESENSI KEHADIRAN',
+                'title' => 'Gunakan Kode Presensi 8 Karakter',
+                'desc' => 'Setelah pendaftaran berhasil, kamu akan mendapatkan kode presensi unik 8 karakter. Buka menu Presensi saat hari acara dan masukkan kode tersebut untuk mengonfirmasi kehadiran.',
                 'selector' => '.public-nav nav a[href*="/presensi"]',
             ],
             [
-                'badge' => 'KOMUNITAS',
-                'title' => 'Ajukan Event Kamu Sendiri',
-                'desc' => 'Punya acara yang ingin dipromosikan? Klik Ajukan Event di pojok kanan atas untuk mengirim detail acara ke tim EventHub.',
+                'badge' => 'AJUKAN EVENT',
+                'title' => 'Promosikan Event Komunitasmu',
+                'desc' => 'Klik Ajukan Event untuk mengirim detail acaramu: isi Nama Event, pilih titik lokasi di peta interaktif, unggah poster, tulis deskripsi, lengkapi kontak penyelenggara & data pengaju. Tim Admin akan meninjau sebelum dipublikasikan.',
                 'selector' => '.public-submit-link',
             ],
             [
-                'badge' => 'PANDUAN',
-                'title' => 'Buka Ulang Kapan Saja',
-                'desc' => 'Klik tombol Panduan ini kapan saja jika kamu ingin melihat kembali langkah-langkah penggunaan EventHub.',
+                'badge' => 'GUIDELINES',
+                'title' => 'Buka Ulang Panduan Kapan Saja',
+                'desc' => 'Klik tombol Guidelines ini kapan saja jika kamu ingin melihat kembali panduan lengkap penggunaan EventHub.',
                 'selector' => '[data-open-guide]',
             ],
         ],

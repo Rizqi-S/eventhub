@@ -47,7 +47,10 @@
                 <form class="global-search" action="{{ route('search.index') }}" method="GET"><span>⌕</span><input
                         name="q" value="{{ request('q') }}"
                         placeholder="Cari event, peserta, pendaftaran..."><kbd>Enter</kbd></form>
-                <button type="button" class="btn outline small" data-open-guide title="Panduan Admin">? Panduan</button>
+                <button type="button" class="btn outline small" data-open-guide title="Admin Guide" style="display:inline-flex;align-items:center;gap:6px;">
+                    <img src="https://unpkg.com/lucide-static@0.542.0/icons/book-user.svg" alt="" width="14" height="14" style="filter:brightness(0) invert(1);">
+                    <span>Admin Guide</span>
+                </button>
                 <a class="public-link" href="{{ route('home') }}" target="_blank" rel="noopener">Lihat website ↗</a>
             </header>
             <section class="page-content">
@@ -63,33 +66,45 @@
         'storageKey' => 'eventhub_admin_guide_seen',
         'steps' => [
             [
-                'badge' => 'DASHBOARD & ANALITIK',
-                'title' => 'Pantau Ringkasan & Tren',
-                'desc' => 'Gunakan Dashboard untuk melihat statistik cepat dan Analitik untuk memantau tren pendaftaran, status pembayaran, serta grafik per event.',
+                'badge' => 'DASHBOARD',
+                'title' => 'Ringkasan Aktivitas & Quick Actions',
+                'desc' => 'Dashboard menampilkan total Event, Peserta, Pendaftaran, Presensi, tombol Quick Actions untuk input cepat, serta grafik distribusi presensi dan pendaftaran per event.',
+                'selector' => '.sidebar a[href$="/admin"]',
+            ],
+            [
+                'badge' => 'ANALITIK',
+                'title' => 'Pantau Tren & Performa Event',
+                'desc' => 'Di menu Analitik, gunakan filter periode (7/30/90/365 hari) untuk melihat grafik tren pendaftaran harian, status pembayaran, presensi, dan grafik batang per event.',
                 'selector' => '.sidebar a[href*="analytics"]',
             ],
             [
-                'badge' => 'EVENTS',
-                'title' => 'Kelola Event & Titik Peta',
-                'desc' => 'Buat atau edit event melalui menu Events. Kamu dapat mencari lokasi langsung di peta interaktif, mengunggah poster, dan mengatur kuota.',
+                'badge' => 'MANAJEMEN EVENT',
+                'title' => 'Buat, Edit, Peta & Poster Event',
+                'desc' => 'Buka menu Events untuk membuat atau mengedit event. Kamu bisa mencari alamat dan menggeser pin peta (Leaflet), mengunggah poster (Cloudinary), menulis deskripsi dengan editor teks, serta mengatur kuota, biaya, dan status event (Draft/Aktif/Berlangsung/Selesai).',
                 'selector' => '.sidebar a[href*="/events"]',
             ],
             [
-                'badge' => 'MODERASI',
+                'badge' => 'MODERASI TAMU',
                 'title' => 'Tinjau Pengajuan Event Tamu',
-                'desc' => 'Buka menu Pengajuan Event untuk menyetujui atau menolak event yang diajukan oleh pengunjung sebelum tampil di halaman publik.',
+                'desc' => 'Menu Pengajuan Event menampung acara yang dikirim pengunjung. Periksa detail acara, kontak, dan link sumber resmi, lalu klik Setujui untuk menerbitkan atau Tolak disertai catatan.',
                 'selector' => '.sidebar a[href*="event-submissions"]',
             ],
             [
-                'badge' => 'PENCARIAN',
-                'title' => 'Pencarian Global',
-                'desc' => 'Cari event, peserta, atau data pendaftaran dengan cepat dari kolom pencarian ini.',
-                'selector' => '.global-search',
+                'badge' => 'OPERASIONAL',
+                'title' => 'Kelola Peserta, Pendaftaran & Presensi',
+                'desc' => 'Gunakan menu Peserta, Pendaftaran, dan Presensi untuk menambah/mengedit data peserta, memverifikasi status pendaftaran & pembayaran, serta mencatat kehadiran peserta.',
+                'selector' => '.sidebar a[href*="pesertas"]',
             ],
             [
-                'badge' => 'PANDUAN',
-                'title' => 'Buka Ulang Kapan Saja',
-                'desc' => 'Klik tombol Panduan ini kapan saja jika kamu ingin mengulang tur fitur Admin EventHub.',
+                'badge' => 'TOOLS & PENCARIAN',
+                'title' => 'Import / Export & Pencarian Global',
+                'desc' => 'Menu Import / Export memungkinkan ekspor laporan (PDF/Excel/CSV) dan impor data massal. Gunakan juga kolom Pencarian Global di topbar untuk mencari event atau peserta secara instan.',
+                'selector' => '.sidebar a[href*="data-management"]',
+            ],
+            [
+                'badge' => 'ADMIN GUIDE',
+                'title' => 'Buka Ulang Panduan Kapan Saja',
+                'desc' => 'Klik tombol Admin Guide ini kapan saja jika kamu ingin mengulang panduan lengkap pengelolaan EventHub.',
                 'selector' => '[data-open-guide]',
             ],
         ],
